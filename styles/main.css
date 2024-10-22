@@ -1,0 +1,41 @@
+.sidebar .sidebar-content {
+    background-image: linear-gradient(#2e7bcf,#2e7bcf);
+    color: white;
+}
+
+.Widget>label {
+    color: white;
+    font-weight: bold;
+}
+
+.stRadio>div{
+    flex-direction:row;
+    align-items: center;
+}
+
+.stRadio>div>label{
+    margin-right: 15px;
+}
+
+/* CSS personalizado para ajustar a barra lateral */
+.st-emotion-cache-j7qwjs.eczjsme15 {
+    display: none !important;
+}
+
+.stSidebarHeader {
+    padding: 0 !important;
+    margin: 0 !important;
+    height: 0 !important;
+}
+
+.stSidebarNavSeparator {
+    display: none !important;
+}
+
+.stSidebar > div:first-child {
+    padding-top: 1rem !important;
+}
+
+.stSidebar .block-container {
+    padding-top: 0 !important;
+}
