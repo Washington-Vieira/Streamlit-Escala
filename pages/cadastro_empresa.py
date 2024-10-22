@@ -7,9 +7,13 @@ def app():
     
     nome_empresa = st.text_input('Nome da Empresa')
     if st.button('Cadastrar Empresa'):
-        if nome_empresa not in st.session_state.empresas:
-            st.session_state.empresas[nome_empresa] = Empresa(nome_empresa)
-            salvar_empresas(st.session_state.empresas)
-            st.success(f'Empresa {nome_empresa} cadastrada com sucesso!')
+        if nome_empresa:
+            if nome_empresa not in st.session_state.empresas:
+                nova_empresa = Empresa(nome_empresa)
+                st.session_state.empresas[nome_empresa] = nova_empresa
+                salvar_empresas(st.session_state.empresas)
+                st.success(f'Empresa {nome_empresa} cadastrada com sucesso!')
+            else:
+                st.error('Esta empresa já está cadastrada.')
         else:
-            st.warning('Essa empresa já está cadastrada!')
+            st.error('Por favor, insira um nome para a empresa.')

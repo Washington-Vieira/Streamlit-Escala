@@ -14,22 +14,21 @@ def app():
     familia_letras = funcoes_familias[funcao_funcionario]
     hora_inicio = st.time_input('Hora de Início do Turno', value=datetime.strptime("06:00", "%H:%M").time())
     hora_fim = st.time_input('Hora de Fim do Turno', value=datetime.strptime("14:00", "%H:%M").time())
-    data_inicio_funcionario = st.date_input('Data de Início do Turno', value=datetime.today())
+    data_inicio = st.date_input('Data de Início', value=datetime.today())
 
     if st.button('Cadastrar Funcionário'):
-        if empresa_selecionada:
-            try:
-                horario_turno = f"{hora_inicio.strftime('%H:%M')} as {hora_fim.strftime('%H:%M')}"
-                novo_funcionario = Funcionario(
-                    nome_funcionario,
-                    funcao_funcionario,
-                    familia_letras,
-                    horario_turno,
-                    data_inicio_funcionario.strftime('%Y-%m-%d'),
-                    turno_funcionario
-                )
-                st.session_state.empresas[empresa_selecionada].adicionar_funcionario(novo_funcionario)
-                salvar_empresas(st.session_state.empresas)
-                st.success(f'Funcionário {nome_funcionario} cadastrado com sucesso!')
-            except Exception as e:
-                st.error(f'Erro ao cadastrar funcionário: {str(e)}')
+        if all([nome_funcionario, funcao_funcionario, familia_letras, hora_inicio.strftime('%H:%M'), hora_fim.strftime('%H:%M'), data_inicio.strftime('%Y-%m-%d'), turno_funcionario, empresa_selecionada]):
+            data_inicio_datetime = datetime.combine(data_inicio, datetime.min.time())
+            novo_funcionario = Funcionario(
+                nome_funcionario,
+                funcao_funcionario,
+                familia_letras,
+                f"{hora_inicio.strftime('%H:%M')} as {hora_fim.strftime('%H:%M')}",
+                data_inicio_datetime,
+                turno_funcionario
+            )
+            st.session_state.empresas[empresa_selecionada].adicionar_funcionario(novo_funcionario)
+            salvar_empresas(st.session_state.empresas)
+            st.success(f'Funcionário {nome_funcionario} cadastrado com sucesso na empresa {empresa_selecionada}!')
+        else:
+            st.error('Por favor, preencha todos os campos.')
