@@ -58,7 +58,3 @@ def app():
                     st.write(f"  - De {ferias['inicio']} a {ferias['fim']}")
         else:
             st.info("Não há histórico de férias registrado.")
-
-        # Adicione esta seção para depuração
-        if st.checkbox("Mostrar dados brutos (para depuração)"):
-            st.json(st.session_state.empresas[empresa_selecionada].__dict__)

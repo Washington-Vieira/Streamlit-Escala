@@ -46,9 +46,15 @@ def salvar_empresas(empresas):
                         'horario_turno': f.horario_turno,
                         'data_inicio': f.data_inicio.strftime('%Y-%m-%d') if isinstance(f.data_inicio, (datetime, date)) else f.data_inicio,
                         'turno': f.turno,
-                        'ferias_atual': f.ferias_atual,
+                        'ferias_atual': {
+                            'inicio': f.ferias_atual['inicio'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['inicio'], (datetime, date)) else f.ferias_atual['inicio'],
+                            'fim': f.ferias_atual['fim'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['fim'], (datetime, date)) else f.ferias_atual['fim']
+                        } if f.ferias_atual else None,
                         'historico_ferias': [
-                            {'inicio': ferias['inicio'].strftime('%Y-%m-%d'), 'fim': ferias['fim'].strftime('%Y-%m-%d')}
+                            {
+                                'inicio': ferias['inicio'].strftime('%Y-%m-%d') if isinstance(ferias['inicio'], (datetime, date)) else ferias['inicio'],
+                                'fim': ferias['fim'].strftime('%Y-%m-%d') if isinstance(ferias['fim'], (datetime, date)) else ferias['fim']
+                            }
                             for ferias in f.historico_ferias
                         ]
                     } for f in funcionarios
@@ -62,9 +68,15 @@ def salvar_empresas(empresas):
                     'horario_turno': f.horario_turno,
                     'data_inicio': f.data_inicio.strftime('%Y-%m-%d') if isinstance(f.data_inicio, (datetime, date)) else f.data_inicio,
                     'turno': f.turno,
-                    'ferias_atual': f.ferias_atual,
+                    'ferias_atual': {
+                        'inicio': f.ferias_atual['inicio'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['inicio'], (datetime, date)) else f.ferias_atual['inicio'],
+                        'fim': f.ferias_atual['fim'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['fim'], (datetime, date)) else f.ferias_atual['fim']
+                    } if f.ferias_atual else None,
                     'historico_ferias': [
-                        {'inicio': ferias['inicio'].strftime('%Y-%m-%d'), 'fim': ferias['fim'].strftime('%Y-%m-%d')}
+                        {
+                            'inicio': ferias['inicio'].strftime('%Y-%m-%d') if isinstance(ferias['inicio'], (datetime, date)) else ferias['inicio'],
+                            'fim': ferias['fim'].strftime('%Y-%m-%d') if isinstance(ferias['fim'], (datetime, date)) else ferias['fim']
+                        }
                         for ferias in f.historico_ferias
                     ]
                 } for f in empresa.funcionarios_em_ferias
@@ -82,16 +94,21 @@ def criar_funcionario(dados):
         dados['funcao'],
         dados['familia_letras'],
         dados['horario_turno'],
-        datetime.strptime(dados['data_inicio'], '%Y-%m-%d'),
+        datetime.strptime(dados['data_inicio'], '%Y-%m-%d').date(),
         dados['turno']
     )
-    funcionario.ferias_atual = dados['ferias_atual']
-    if funcionario.ferias_atual:
-        funcionario.ferias_atual['inicio'] = datetime.strptime(funcionario.ferias_atual['inicio'], '%Y-%m-%d').date()
-        funcionario.ferias_atual['fim'] = datetime.strptime(funcionario.ferias_atual['fim'], '%Y-%m-%d').date()
+    if dados['ferias_atual']:
+        funcionario.ferias_atual = {
+            'inicio': datetime.strptime(dados['ferias_atual']['inicio'], '%Y-%m-%d').date(),
+            'fim': datetime.strptime(dados['ferias_atual']['fim'], '%Y-%m-%d').date()
+        }
+    else:
+        funcionario.ferias_atual = None
     funcionario.historico_ferias = [
-        {'inicio': datetime.strptime(ferias['inicio'], '%Y-%m-%d').date(),
-         'fim': datetime.strptime(ferias['fim'], '%Y-%m-%d').date()}
+        {
+            'inicio': datetime.strptime(ferias['inicio'], '%Y-%m-%d').date(),
+            'fim': datetime.strptime(ferias['fim'], '%Y-%m-%d').date()
+        }
         for ferias in dados['historico_ferias']
     ]
     return funcionario

@@ -2,17 +2,38 @@
     "guarapuava": {
         "nome": "guarapuava",
         "funcionarios": {
-            "Turno 1": [],
+            "Turno 1": [
+                {
+                    "nome": "jose",
+                    "funcao": "Caixa",
+                    "familia_letras": "C",
+                    "horario_turno": "06:00 as 14:00",
+                    "data_inicio": "2024-10-23",
+                    "turno": "Turno 1",
+                    "ferias_atual": null,
+                    "historico_ferias": []
+                },
+                {
+                    "nome": "jo\u00e3o",
+                    "funcao": "Caixa",
+                    "familia_letras": "C",
+                    "horario_turno": "06:00 as 14:00",
+                    "data_inicio": "2024-10-23",
+                    "turno": "Turno 1",
+                    "ferias_atual": null,
+                    "historico_ferias": [
+                        {
+                            "inicio": "2024-10-23",
+                            "fim": "2024-11-22"
+                        }
+                    ]
+                }
+            ],
             "Turno 2": [],
             "Turno 3": []
         },
-        "funcionarios_em_ferias": [
-            {
-                "nome": "jo\u00e3o",
-                "funcao": "Caixa",
-                "familia_letras": "C",
-                "horario_turno": "06:00 as 14:00",
-                "data_inicio": "2024-10-22",
-                "turno": "Turno 1",
-                "ferias_atual": {
-                    "inicio": 
+        "funcionarios_em_ferias": [],
+        "folguistas": [],
+        "folguistas_escala": null
+    }
+}
