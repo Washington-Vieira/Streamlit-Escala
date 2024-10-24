@@ -19,10 +19,14 @@ def app():
             if empresa.folguistas_escala is None:
                 empresa.folguistas_escala = []
             
-            novo_folguista = {'Folguista': f"{nome_folguista} (CP)"}
-            novo_folguista.update({f'Dia {i+1}': '' for i in range(num_dias_no_mes)})
-            empresa.folguistas_escala.append(novo_folguista)
-            empresa.adicionar_folguista(nome_folguista)
+            # Supondo que você tenha uma classe Funcionario
+            novo_folguista = Funcionario(nome=nome_folguista)
+            empresa.folguistas.append(novo_folguista)
+            
+            # Atualizar a escala de folguistas
+            folguista_escala = {'Folguista': f"{nome_folguista} (CP)"}
+            folguista_escala.update({f'Dia {i+1}': '' for i in range(num_dias_no_mes)})
+            empresa.folguistas_escala.append(folguista_escala)
             
             salvar_empresas(st.session_state.empresas)
             st.success(f'Folguista {nome_folguista} (CP) cadastrado na empresa {empresa_selecionada}!')

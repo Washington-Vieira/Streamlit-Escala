@@ -15,9 +15,13 @@ def app():
         funcionarios = []
         for turno in empresa.funcionarios.values():
             funcionarios.extend(turno)
-        funcionarios.extend(empresa.funcionarios_em_ferias)
+        # Certifique-se de que todos os itens são objetos de funcionário
+        funcionarios.extend([f for f in empresa.funcionarios_em_ferias if hasattr(f, 'nome')])
+        # Inclua os folguistas na lista de seleção de funcionários
+        funcionarios.extend([f for f in empresa.folguistas if hasattr(f, 'nome')])
 
         st.subheader('Registrar Férias')
+        # Inclua os folguistas na seleção de funcionários
         funcionario_selecionado = st.selectbox('Selecione o Funcionário', options=[f.nome for f in funcionarios])
         data_inicio_ferias = st.date_input('Data de Início das Férias', value=datetime.today())
         duracao_ferias = st.number_input('Duração das Férias (em dias)', min_value=1, max_value=30, value=30)
@@ -42,9 +46,12 @@ def app():
                 with col2:
                     if st.button('Retornar ao Trabalho', key=f'retorno_{funcionario.nome}'):
                         funcionario.encerrar_ferias()
-                        empresa.adicionar_funcionario_a_escala(funcionario)
+                        if funcionario in empresa.folguistas:
+                            empresa.adicionar_folguista(funcionario)
+                        else:
+                            empresa.adicionar_funcionario_a_escala(funcionario)
                         salvar_empresas(st.session_state.empresas)
-                        st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala.')
+                        st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala ou lista de folguistas.')
                         st.rerun()
         else:
             st.info("Não há funcionários em férias no momento.")
