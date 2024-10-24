@@ -40,3 +40,20 @@ def app():
             st.success(f'Folguista {nome_folguista} (CP) cadastrado na empresa {empresa_selecionada}!')
         else:
             st.error('Por favor, preencha todos os campos.')
+
+    # Adicionar funcionalidade de exclusão de folguista
+    st.subheader('Excluir Folguista')
+    if empresa_selecionada:
+        empresa = st.session_state.empresas[empresa_selecionada]
+        folguistas = empresa.folguistas
+        folguista_para_excluir = st.selectbox('Selecione o Folguista para Excluir', options=[f.nome for f in folguistas])
+
+        if st.button('Excluir Folguista'):
+            for folguista in folguistas:
+                if folguista.nome == folguista_para_excluir:
+                    folguistas.remove(folguista)
+                    # Remover o folguista da escala
+                    empresa.remover_folguista_da_escala(folguista)
+                    salvar_empresas(st.session_state.empresas)
+                    st.success(f'Folguista {folguista_para_excluir} excluído com sucesso!')
+                    st.rerun()

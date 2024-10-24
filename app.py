@@ -43,4 +43,4 @@ if 'page' not in st.session_state:
 PAGES[st.session_state.page]()
 
 # Adicionar informações no rodapé
-st.sidebar.text('Versão 1.0')
+st.sidebar.text('Versão 0.5.7')
