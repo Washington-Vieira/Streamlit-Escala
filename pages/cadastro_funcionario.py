@@ -40,13 +40,16 @@ def app():
         todos_funcionarios = [func for turno in funcionarios.values() for func in turno]
         funcionario_para_excluir = st.selectbox('Selecione o Funcionário para Excluir', options=[f.nome for f in todos_funcionarios])
 
-        if st.button('Excluir Funcionário'):
-            for turno, lista_funcionarios in funcionarios.items():
-                for func in lista_funcionarios:
-                    if func.nome == funcionario_para_excluir:
-                        lista_funcionarios.remove(func)
-                        # Remover o funcionário da escala
-                        st.session_state.empresas[empresa_selecionada].remover_funcionario_da_escala(func)
-                        salvar_empresas(st.session_state.empresas)
-                        st.success(f'Funcionário {funcionario_para_excluir} excluído com sucesso!')
-                        st.rerun()
+        if st.checkbox('Confirmar exclusão', key='confirm_excluir_funcionario'):
+            if st.button('Excluir Funcionário'):
+                for turno, lista_funcionarios in funcionarios.items():
+                    for func in lista_funcionarios:
+                        if func.nome == funcionario_para_excluir:
+                            lista_funcionarios.remove(func)
+                            # Remover o funcionário da escala
+                            st.session_state.empresas[empresa_selecionada].remover_funcionario_da_escala(func)
+                            salvar_empresas(st.session_state.empresas)
+                            st.success(f'Funcionário {funcionario_para_excluir} excluído com sucesso!')
+                            st.rerun()
+        else:
+            st.error('Marque a caixa de confirmação para excluir.', icon="⚠️")
