@@ -11,16 +11,7 @@
                     "data_inicio": "2024-10-24",
                     "turno": "Turno 1",
                     "ferias_atual": null,
-                    "historico_ferias": [
-                        {
-                            "inicio": "2024-10-24",
-                            "fim": "2024-11-23"
-                        },
-                        {
-                            "inicio": "2024-10-24",
-                            "fim": "2024-11-23"
-                        }
-                    ]
+                    "historico_ferias": []
                 },
                 {
                     "nome": "joao",
@@ -30,15 +21,21 @@
                     "data_inicio": "2024-10-24",
                     "turno": "Turno 1",
                     "ferias_atual": null,
-                    "historico_ferias": [
-                        {
-                            "inicio": "2024-10-24",
-                            "fim": "2024-11-23"
-                        }
-                    ]
+                    "historico_ferias": []
                 }
             ],
-            "Turno 2": [],
+            "Turno 2": [
+                {
+                    "nome": "amadeu",
+                    "funcao": "Caixa",
+                    "familia_letras": "C",
+                    "horario_turno": "06:00 as 14:00",
+                    "data_inicio": "2024-10-24",
+                    "turno": "Turno 2",
+                    "ferias_atual": null,
+                    "historico_ferias": []
+                }
+            ],
             "Turno 3": []
         },
         "funcionarios_em_ferias": [],
@@ -53,53 +50,59 @@
                 "ferias_atual": null,
                 "historico_ferias": [
                     {
-                        "inicio": "2024-10-24",
-                        "fim": "2024-11-23"
-                    },
-                    {
-                        "inicio": "2024-10-24",
-                        "fim": "2024-11-23"
+                        "inicio": "2024-10-01",
+                        "fim": "2024-10-31"
                     }
                 ]
             },
             {
-                "nome": "fabio",
+                "nome": "julio",
                 "funcao": "Folguista",
                 "familia_letras": "CP",
                 "horario_turno": "Vari\u00e1vel",
                 "data_inicio": "2024-10-24",
                 "turno": "Vari\u00e1vel",
                 "ferias_atual": null,
-                "historico_ferias": [
-                    {
-                        "inicio": "2024-10-24",
-                        "fim": "2024-11-23"
-                    }
-                ]
-            },
-            {
-                "nome": "fabio",
-                "funcao": "Folguista",
-                "familia_letras": "CP",
-                "horario_turno": "Vari\u00e1vel",
-                "data_inicio": "2024-10-24",
-                "turno": "Vari\u00e1vel",
-                "ferias_atual": null,
-                "historico_ferias": [
-                    {
-                        "inicio": "2024-10-24",
-                        "fim": "2024-11-23"
-                    },
-                    {
-                        "inicio": "2024-10-24",
-                        "fim": "2024-11-23"
-                    }
-                ]
+                "historico_ferias": []
             }
         ],
         "folguistas_escala": [
             {
                 "Folguista": "fabio (CP)",
+                "Dia 1": "16",
+                "Dia 2": "",
+                "Dia 3": "",
+                "Dia 4": "",
+                "Dia 5": "",
+                "Dia 6": "",
+                "Dia 7": "",
+                "Dia 8": "",
+                "Dia 9": "",
+                "Dia 10": "",
+                "Dia 11": "",
+                "Dia 12": "",
+                "Dia 13": "",
+                "Dia 14": "",
+                "Dia 15": "",
+                "Dia 16": "",
+                "Dia 17": "",
+                "Dia 18": "",
+                "Dia 19": "",
+                "Dia 20": "",
+                "Dia 21": "",
+                "Dia 22": "",
+                "Dia 23": "",
+                "Dia 24": "",
+                "Dia 25": "",
+                "Dia 26": "",
+                "Dia 27": "",
+                "Dia 28": "",
+                "Dia 29": "",
+                "Dia 30": "",
+                "Dia 31": ""
+            },
+            {
+                "Folguista": "julio (CP)",
                 "Dia 1": "",
                 "Dia 2": "",
                 "Dia 3": "",

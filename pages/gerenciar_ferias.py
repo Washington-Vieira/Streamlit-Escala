@@ -31,9 +31,15 @@ def app():
                 if funcionario.nome == funcionario_selecionado:
                     data_fim_ferias = data_inicio_ferias + timedelta(days=duracao_ferias)
                     funcionario.registrar_ferias(data_inicio_ferias, data_fim_ferias)
-                    empresa.remover_funcionario_da_escala(funcionario)
+                    
+                    if funcionario.funcao == "Folguista":
+                        empresa.remover_folguista_da_escala(funcionario)
+                        st.success(f'Férias registradas para o folguista {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Folguista removido da escala de trabalho.')
+                    else:
+                        empresa.remover_funcionario_da_escala(funcionario)
+                        st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Funcionário removido da escala de trabalho.')
+                    
                     salvar_empresas(st.session_state.empresas)
-                    st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Funcionário removido da escala de trabalho.')
                     st.rerun()
         
         st.subheader('Funcionários em Férias')
@@ -46,12 +52,13 @@ def app():
                 with col2:
                     if st.button('Retornar ao Trabalho', key=f'retorno_{funcionario.nome}'):
                         funcionario.encerrar_ferias()
-                        if funcionario in empresa.folguistas:
-                            empresa.adicionar_folguista(funcionario)
+                        if funcionario.funcao == "Folguista":
+                            empresa.adicionar_folguista_a_escala(funcionario)
+                            st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala de folguistas.')
                         else:
                             empresa.adicionar_funcionario_a_escala(funcionario)
+                            st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala.')
                         salvar_empresas(st.session_state.empresas)
-                        st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala ou lista de folguistas.')
                         st.rerun()
         else:
             st.info("Não há funcionários em férias no momento.")

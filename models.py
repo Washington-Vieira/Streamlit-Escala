@@ -65,7 +65,7 @@ class Empresa:
         self.funcionarios = {'Turno 1': [], 'Turno 2': [], 'Turno 3': []}
         self.funcionarios_em_ferias = []
         self.folguistas = []
-        self.folguistas_escala = None
+        self.folguistas_escala = []
 
     def adicionar_funcionario(self, funcionario):
         self.funcionarios[funcionario.turno].append(funcionario)
@@ -84,3 +84,12 @@ class Empresa:
         if funcionario in self.funcionarios_em_ferias:
             self.funcionarios_em_ferias.remove(funcionario)
         self.funcionarios[funcionario.turno].append(funcionario)
+
+    def remover_folguista_da_escala(self, folguista):
+        self.folguistas_escala = [f for f in self.folguistas_escala if f['Folguista'] != f"{folguista.nome} (CP)"]
+
+    def adicionar_folguista_a_escala(self, folguista):
+        if not any(f['Folguista'] == f"{folguista.nome} (CP)" for f in self.folguistas_escala):
+            novo_folguista_escala = {'Folguista': f"{folguista.nome} (CP)"}
+            novo_folguista_escala.update({f'Dia {i+1}': '' for i in range(31)})  # Assumindo um mês de 31 dias
+            self.folguistas_escala.append(novo_folguista_escala)
