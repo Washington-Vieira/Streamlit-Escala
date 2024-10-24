@@ -15,60 +15,67 @@ def app():
         funcionarios = []
         for turno in empresa.funcionarios.values():
             funcionarios.extend(turno)
-        # Certifique-se de que todos os itens são objetos de funcionário
         funcionarios.extend([f for f in empresa.funcionarios_em_ferias if hasattr(f, 'nome')])
-        # Inclua os folguistas na lista de funcionários
         funcionarios.extend([f for f in empresa.folguistas if hasattr(f, 'nome')])
 
-        st.subheader('Registrar Férias')
-        # Inclua os folguistas na seleção de funcionários
-        funcionario_selecionado = st.selectbox('Selecione o Funcionário', options=[f.nome for f in funcionarios])
-        data_inicio_ferias = st.date_input('Data de Início das Férias', value=datetime.today())
-        duracao_ferias = st.number_input('Duração das Férias (em dias)', min_value=1, max_value=30, value=30)
+        st.markdown("## Registrar Férias")
+        with st.form("registrar_ferias"):
+            funcionario_selecionado = st.selectbox('Selecione o Funcionário', options=[f.nome for f in funcionarios])
+            col1, col2 = st.columns(2)
+            with col1:
+                data_inicio_ferias = st.date_input('Data de Início das Férias', value=datetime.today())
+            with col2:
+                duracao_ferias = st.number_input('Duração das Férias (em dias)', min_value=1, max_value=30, value=30)
+            
+            submit_button = st.form_submit_button("Registrar Férias")
+            
+            if submit_button:
+                for funcionario in funcionarios:
+                    if funcionario.nome == funcionario_selecionado:
+                        data_fim_ferias = data_inicio_ferias + timedelta(days=duracao_ferias)
+                        funcionario.registrar_ferias(data_inicio_ferias, data_fim_ferias)
+                        
+                        if funcionario.funcao == "Folguista":
+                            empresa.remover_folguista_da_escala(funcionario)
+                            st.success(f'Férias registradas para o folguista {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Folguista removido da escala de trabalho.')
+                        else:
+                            empresa.remover_funcionario_da_escala(funcionario)
+                            st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Funcionário removido da escala de trabalho.')
+                        
+                        salvar_empresas(st.session_state.empresas)
+                        st.rerun()
         
-        if st.button('Registrar Férias'):
-            for funcionario in funcionarios:
-                if funcionario.nome == funcionario_selecionado:
-                    data_fim_ferias = data_inicio_ferias + timedelta(days=duracao_ferias)
-                    funcionario.registrar_ferias(data_inicio_ferias, data_fim_ferias)
-                    
-                    if funcionario.funcao == "Folguista":
-                        empresa.remover_folguista_da_escala(funcionario)
-                        st.success(f'Férias registradas para o folguista {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Folguista removido da escala de trabalho.')
-                    else:
-                        empresa.remover_funcionario_da_escala(funcionario)
-                        st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}. Funcionário removido da escala de trabalho.')
-                    
-                    salvar_empresas(st.session_state.empresas)
-                    st.rerun()
-        
-        st.subheader('Funcionários em Férias')
+        st.markdown("## Funcionários em Férias")
         funcionarios_em_ferias = [f for f in funcionarios if f.em_ferias()]
         if funcionarios_em_ferias:
             for funcionario in funcionarios_em_ferias:
-                col1, col2 = st.columns([3, 1])
-                with col1:
-                    st.write(f"{funcionario.nome}: {funcionario.ferias_atual['inicio']} a {funcionario.ferias_atual['fim']}")
-                with col2:
-                    if st.button('Retornar ao Trabalho', key=f'retorno_{funcionario.nome}'):
-                        funcionario.encerrar_ferias()
-                        if funcionario.funcao == "Folguista":
-                            empresa.adicionar_folguista_a_escala(funcionario)
-                            st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala de folguistas.')
-                        else:
-                            empresa.adicionar_funcionario_a_escala(funcionario)
-                            st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala.')
-                        salvar_empresas(st.session_state.empresas)
-                        st.rerun()
+                with st.container():
+                    col1, col2, col3 = st.columns([2, 2, 1])
+                    with col1:
+                        st.markdown(f"**{funcionario.nome}**")
+                    with col2:
+                        st.write(f"{funcionario.ferias_atual['inicio']} a {funcionario.ferias_atual['fim']}")
+                    with col3:
+                        if st.button('Retornar ao Trabalho', key=f'retorno_{funcionario.nome}'):
+                            funcionario.encerrar_ferias()
+                            if funcionario.funcao == "Folguista":
+                                empresa.adicionar_folguista_a_escala(funcionario)
+                                st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala de folguistas.')
+                            else:
+                                empresa.adicionar_funcionario_a_escala(funcionario)
+                                st.success(f'{funcionario.nome} retornou ao trabalho e foi reintegrado à escala.')
+                            salvar_empresas(st.session_state.empresas)
+                            st.rerun()
+                st.markdown("---")
         else:
             st.info("Não há funcionários em férias no momento.")
 
-        st.subheader('Histórico de Férias')
+        st.markdown("## Histórico de Férias")
         funcionarios_com_historico = [f for f in funcionarios if f.historico_ferias]
         if funcionarios_com_historico:
             for funcionario in funcionarios_com_historico:
-                st.write(f"{funcionario.nome}:")
-                for ferias in funcionario.historico_ferias:
-                    st.write(f"  - De {ferias['inicio']} a {ferias['fim']}")
+                with st.expander(f"{funcionario.nome}"):
+                    for ferias in funcionario.historico_ferias:
+                        st.write(f"De {ferias['inicio']} a {ferias['fim']}")
         else:
             st.info("Não há histórico de férias registrado.")

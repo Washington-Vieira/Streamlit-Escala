@@ -39,3 +39,47 @@
 .stSidebar .block-container {
     padding-top: 0 !important;
 }
+
+/* Estilos para a página de gerenciar férias */
+.stMarkdown h2 {
+    color: #2e7bcf;
+    border-bottom: 2px solid #2e7bcf;
+    padding-bottom: 10px;
+    margin-top: 30px;
+}
+
+.stContainer {
+    background-color: #f0f2f6;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.stExpander {
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.stInfo {
+    background-color: #e1f5fe;
+    border-left: 5px solid #03a9f4;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.stSuccess {
+    background-color: #e8f5e9;
+    border-left: 5px solid #4caf50;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.stButton > button {
+    background-color: #2e7bcf;
+    color: white;
+}
+
+.stButton > button:hover {
+    background-color: #1a5f9e;
+}
