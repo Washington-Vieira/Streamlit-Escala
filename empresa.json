@@ -14,7 +14,7 @@
                     "historico_ferias": []
                 },
                 {
-                    "nome": "jose",
+                    "nome": "mario",
                     "funcao": "Caixa",
                     "familia_letras": "C",
                     "horario_turno": "06:00 as 14:00",
@@ -22,6 +22,21 @@
                     "turno": "Turno 1",
                     "ferias_atual": null,
                     "historico_ferias": []
+                },
+                {
+                    "nome": "jose",
+                    "funcao": "Caixa",
+                    "familia_letras": "C",
+                    "horario_turno": "06:00 as 14:00",
+                    "data_inicio": "2024-10-24",
+                    "turno": "Turno 1",
+                    "ferias_atual": null,
+                    "historico_ferias": [
+                        {
+                            "inicio": "2024-10-24",
+                            "fim": "2024-11-23"
+                        }
+                    ]
                 }
             ],
             "Turno 2": [],
@@ -30,7 +45,7 @@
         "funcionarios_em_ferias": [],
         "folguistas": [
             {
-                "nome": "julio",
+                "nome": "fabio",
                 "funcao": "Folguista",
                 "familia_letras": "CP",
                 "horario_turno": "Vari\u00e1vel",
@@ -40,7 +55,7 @@
                 "historico_ferias": []
             },
             {
-                "nome": "fabio",
+                "nome": "lucas",
                 "funcao": "Folguista",
                 "familia_letras": "CP",
                 "horario_turno": "Vari\u00e1vel",
@@ -52,7 +67,7 @@
         ],
         "folguistas_escala": [
             {
-                "Folguista": "julio (CP)",
+                "Folguista": "fabio (CP)",
                 "Dia 1": "",
                 "Dia 2": "",
                 "Dia 3": "",
@@ -86,7 +101,7 @@
                 "Dia 31": ""
             },
             {
-                "Folguista": "fabio (CP)",
+                "Folguista": "lucas (CP)",
                 "Dia 1": "",
                 "Dia 2": "",
                 "Dia 3": "",
