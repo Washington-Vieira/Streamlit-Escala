@@ -11,26 +11,24 @@ def carregar_empresas():
     try:
         with open('empresa.json', 'r') as f:
             dados = json.load(f)
-        
-        empresas = {}
-        for nome, dados_empresa in dados.items():
-            empresa = Empresa(nome)
-            for turno, funcionarios in dados_empresa['funcionarios'].items():
-                for f in funcionarios:
-                    funcionario = criar_funcionario(f)
-                    empresa.adicionar_funcionario(funcionario)
-            
-            for f in dados_empresa.get('funcionarios_em_ferias', []):
-                funcionario = criar_funcionario(f)
-                empresa.funcionarios_em_ferias.append(funcionario)
-            
-            empresa.folguistas = dados_empresa['folguistas']
-            empresa.folguistas_escala = dados_empresa['folguistas_escala']
-            empresas[nome] = empresa
-        
-        return empresas
+    except json.JSONDecodeError:
+        print("Erro ao decodificar o arquivo JSON. Criando um novo arquivo.")
+        dados = {}
     except FileNotFoundError:
-        return {}
+        print("Arquivo não encontrado. Criando um novo arquivo.")
+        dados = {}
+
+    empresas = {}
+    for nome, empresa_dados in dados.items():
+        empresa = Empresa(nome)
+        for turno, funcionarios in empresa_dados['funcionarios'].items():
+            empresa.funcionarios[turno] = [criar_funcionario(func) for func in funcionarios]
+        empresa.funcionarios_em_ferias = [criar_funcionario(func) for func in empresa_dados.get('funcionarios_em_ferias', [])]
+        empresa.folguistas = [criar_funcionario(func) for func in empresa_dados.get('folguistas', [])]
+        empresa.folguistas_escala = empresa_dados.get('folguistas_escala')
+        empresas[nome] = empresa
+    
+    return empresas
 
 def salvar_empresas(empresas):
     dados = {}
@@ -38,55 +36,16 @@ def salvar_empresas(empresas):
         dados[nome] = {
             'nome': empresa.nome,
             'funcionarios': {
-                turno: [
-                    {
-                        'nome': f.nome,
-                        'funcao': f.funcao,
-                        'familia_letras': f.familia_letras,
-                        'horario_turno': f.horario_turno,
-                        'data_inicio': f.data_inicio.strftime('%Y-%m-%d') if isinstance(f.data_inicio, (datetime, date)) else f.data_inicio,
-                        'turno': f.turno,
-                        'ferias_atual': {
-                            'inicio': f.ferias_atual['inicio'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['inicio'], (datetime, date)) else f.ferias_atual['inicio'],
-                            'fim': f.ferias_atual['fim'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['fim'], (datetime, date)) else f.ferias_atual['fim']
-                        } if f.ferias_atual else None,
-                        'historico_ferias': [
-                            {
-                                'inicio': ferias['inicio'].strftime('%Y-%m-%d') if isinstance(ferias['inicio'], (datetime, date)) else ferias['inicio'],
-                                'fim': ferias['fim'].strftime('%Y-%m-%d') if isinstance(ferias['fim'], (datetime, date)) else ferias['fim']
-                            }
-                            for ferias in f.historico_ferias
-                        ]
-                    } for f in funcionarios
-                ] for turno, funcionarios in empresa.funcionarios.items()
+                turno: [func.to_dict() for func in funcionarios]
+                for turno, funcionarios in empresa.funcionarios.items()
             },
-            'funcionarios_em_ferias': [
-                {
-                    'nome': f.nome,
-                    'funcao': f.funcao,
-                    'familia_letras': f.familia_letras,
-                    'horario_turno': f.horario_turno,
-                    'data_inicio': f.data_inicio.strftime('%Y-%m-%d') if isinstance(f.data_inicio, (datetime, date)) else f.data_inicio,
-                    'turno': f.turno,
-                    'ferias_atual': {
-                        'inicio': f.ferias_atual['inicio'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['inicio'], (datetime, date)) else f.ferias_atual['inicio'],
-                        'fim': f.ferias_atual['fim'].strftime('%Y-%m-%d') if f.ferias_atual and isinstance(f.ferias_atual['fim'], (datetime, date)) else f.ferias_atual['fim']
-                    } if f.ferias_atual else None,
-                    'historico_ferias': [
-                        {
-                            'inicio': ferias['inicio'].strftime('%Y-%m-%d') if isinstance(ferias['inicio'], (datetime, date)) else ferias['inicio'],
-                            'fim': ferias['fim'].strftime('%Y-%m-%d') if isinstance(ferias['fim'], (datetime, date)) else ferias['fim']
-                        }
-                        for ferias in f.historico_ferias
-                    ]
-                } for f in empresa.funcionarios_em_ferias
-            ],
-            'folguistas': empresa.folguistas,
+            'funcionarios_em_ferias': [func.to_dict() for func in empresa.funcionarios_em_ferias],
+            'folguistas': [func.to_dict() for func in empresa.folguistas],
             'folguistas_escala': empresa.folguistas_escala
         }
     
     with open('empresa.json', 'w') as f:
-        json.dump(dados, f, indent=4)
+        json.dump(dados, f, indent=4, default=json_serial)
 
 def criar_funcionario(dados):
     funcionario = Funcionario(
@@ -112,3 +71,9 @@ def criar_funcionario(dados):
         for ferias in dados['historico_ferias']
     ]
     return funcionario
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+    if isinstance(obj, date):
+        return obj.isoformat()
+    raise TypeError(f"Type {type(obj)} not serializable")

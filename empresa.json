@@ -1,20 +1,29 @@
 {
-    "guarapuava": {
-        "nome": "guarapuava",
+    "matriz palmeira": {
+        "nome": "matriz palmeira",
         "funcionarios": {
             "Turno 1": [
                 {
-                    "nome": "joao",
+                    "nome": "jose",
                     "funcao": "Caixa",
                     "familia_letras": "C",
                     "horario_turno": "06:00 as 14:00",
                     "data_inicio": "2024-10-24",
                     "turno": "Turno 1",
                     "ferias_atual": null,
-                    "historico_ferias": []
+                    "historico_ferias": [
+                        {
+                            "inicio": "2024-10-24",
+                            "fim": "2024-11-23"
+                        },
+                        {
+                            "inicio": "2024-10-24",
+                            "fim": "2024-11-23"
+                        }
+                    ]
                 },
                 {
-                    "nome": "jose",
+                    "nome": "joao",
                     "funcao": "Caixa",
                     "familia_letras": "C",
                     "horario_turno": "06:00 as 14:00",
@@ -34,7 +43,59 @@
         },
         "funcionarios_em_ferias": [],
         "folguistas": [
-            "fabio"
+            {
+                "nome": "fabio",
+                "funcao": "Folguista",
+                "familia_letras": "CP",
+                "horario_turno": "Vari\u00e1vel",
+                "data_inicio": "2024-10-24",
+                "turno": "Vari\u00e1vel",
+                "ferias_atual": null,
+                "historico_ferias": [
+                    {
+                        "inicio": "2024-10-24",
+                        "fim": "2024-11-23"
+                    },
+                    {
+                        "inicio": "2024-10-24",
+                        "fim": "2024-11-23"
+                    }
+                ]
+            },
+            {
+                "nome": "fabio",
+                "funcao": "Folguista",
+                "familia_letras": "CP",
+                "horario_turno": "Vari\u00e1vel",
+                "data_inicio": "2024-10-24",
+                "turno": "Vari\u00e1vel",
+                "ferias_atual": null,
+                "historico_ferias": [
+                    {
+                        "inicio": "2024-10-24",
+                        "fim": "2024-11-23"
+                    }
+                ]
+            },
+            {
+                "nome": "fabio",
+                "funcao": "Folguista",
+                "familia_letras": "CP",
+                "horario_turno": "Vari\u00e1vel",
+                "data_inicio": "2024-10-24",
+                "turno": "Vari\u00e1vel",
+                "ferias_atual": null,
+                "historico_ferias": [
+                    {
+                        "inicio": "2024-10-24",
+                        "fim": "2024-11-23"
+                    },
+                    {
+                        "inicio": "2024-10-24",
+                        "fim": "2024-11-23"
+                    }
+                ]
+            }
         ],
         "folguistas_escala": [
             {

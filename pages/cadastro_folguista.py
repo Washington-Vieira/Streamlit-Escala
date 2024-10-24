@@ -2,6 +2,7 @@ import streamlit as st
 import calendar
 from datetime import datetime
 from data_manager import salvar_empresas
+from models import Funcionario
 
 def app():
     st.title('Cadastro de Folguistas')
@@ -10,7 +11,7 @@ def app():
     nome_folguista = st.text_input('Nome do Folguista')
     
     if st.button('Cadastrar Folguista'):
-        if empresa_selecionada:
+        if empresa_selecionada and nome_folguista:
             empresa = st.session_state.empresas[empresa_selecionada]
             
             data_atual = datetime.now()
@@ -19,8 +20,15 @@ def app():
             if empresa.folguistas_escala is None:
                 empresa.folguistas_escala = []
             
-            # Supondo que você tenha uma classe Funcionario
-            novo_folguista = Funcionario(nome=nome_folguista)
+            # Criar um novo folguista com valores padrão
+            novo_folguista = Funcionario(
+                nome=nome_folguista,
+                funcao="Folguista",
+                familia_letras="CP",
+                horario_turno="Variável",
+                data_inicio=data_atual.date(),
+                turno="Variável"
+            )
             empresa.folguistas.append(novo_folguista)
             
             # Atualizar a escala de folguistas
@@ -30,3 +38,5 @@ def app():
             
             salvar_empresas(st.session_state.empresas)
             st.success(f'Folguista {nome_folguista} (CP) cadastrado na empresa {empresa_selecionada}!')
+        else:
+            st.error('Por favor, preencha todos os campos.')

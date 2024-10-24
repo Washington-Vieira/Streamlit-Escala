@@ -17,7 +17,7 @@ def app():
             funcionarios.extend(turno)
         # Certifique-se de que todos os itens são objetos de funcionário
         funcionarios.extend([f for f in empresa.funcionarios_em_ferias if hasattr(f, 'nome')])
-        # Inclua os folguistas na lista de seleção de funcionários
+        # Inclua os folguistas na lista de funcionários
         funcionarios.extend([f for f in empresa.folguistas if hasattr(f, 'nome')])
 
         st.subheader('Registrar Férias')
