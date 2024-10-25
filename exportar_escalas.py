@@ -70,6 +70,7 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
         # Aplicar formatação condicional
         verde = PatternFill(start_color='00B050', end_color='00B050', fill_type='solid')
         laranja = PatternFill(start_color='FF6400', end_color='FF6400', fill_type='solid')
+        azul = PatternFill(start_color='00B0F0', end_color='00B0F0', fill_type='solid')
 
         # Aplicar regra para "folga"
         worksheet.conditional_formatting.add(f'B4:{get_column_letter(worksheet.max_column)}{worksheet.max_row}',
@@ -78,6 +79,13 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
         # Aplicar regra para "folga (domingo)"
         worksheet.conditional_formatting.add(f'B4:{get_column_letter(worksheet.max_column)}{worksheet.max_row}',
                                              CellIsRule(operator='equal', formula=['"folga (domingo)"'], fill=laranja))
+
+        # Identificar e pintar os sábados de azul
+        for col in range(2, worksheet.max_column + 1):  # Começando da coluna B
+            if worksheet.cell(row=3, column=col).value.lower().startswith('sáb'):
+                for row in range(4, worksheet.max_row + 1):
+                    cell = worksheet.cell(row=row, column=col)
+                    cell.fill = azul
 
     # Remover bordas internas da linha 2
     no_border = Border(left=Side(style=None), 
