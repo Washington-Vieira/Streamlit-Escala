@@ -36,7 +36,8 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
     merged_cell.alignment = Alignment(horizontal='center', vertical='center')
 
     # Função para configurar dimensões e estilos das células
-    def configurar_celulas(worksheet, df):
+    def configurar_celulas(worksheet, df, linha_inicio=4, linha_inicio_folguistas=None, 
+                           linha_titulo_folguistas=None, linha_cabecalho_folguistas=None):
         # Configurar largura das colunas
         for col in worksheet.columns:
             col_letter = get_column_letter(col[0].column)
@@ -46,17 +47,18 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
                 worksheet.column_dimensions[col_letter].width = 6
 
         # Configurar altura das linhas
-        worksheet.row_dimensions[3].height = 15  # Altura do cabeçalho
-        for row in range(4, worksheet.max_row + 1):  # Linhas de dados
-            worksheet.row_dimensions[row].height = 50.25
+        for row in range(linha_inicio, worksheet.max_row + 1):  # Linhas de dados
+            if linha_inicio_folguistas is None or linha_titulo_folguistas is None or linha_cabecalho_folguistas is None or \
+               row not in [linha_inicio_folguistas, linha_titulo_folguistas, linha_cabecalho_folguistas]:  # Não alterar as linhas especiais
+                worksheet.row_dimensions[row].height = 50.25
 
         # Aplicar estilos
         for row in worksheet.iter_rows(min_row=1, max_row=worksheet.max_row, min_col=1, max_col=worksheet.max_column):
             for cell in row:
                 cell.border = border
                 cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
-                if cell.row == 3:
-                    cell.font = header_font
+                if cell.row == 3 or cell.row == linha_cabecalho_folguistas:
+                    cell.font = Font(size=10, bold=True)
                 else:
                     cell.font = cell_font
 
@@ -117,28 +119,43 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
     else:
         ws.cell(row=3, column=1, value="Nenhuma escala de trabalho disponível")
 
-    # Adicionar escala de folguistas em uma nova planilha
-    ws_folguistas = wb.create_sheet(title="Escala de Folguistas")
+    # Adicionar escala de folguistas na mesma página
+    ultima_linha_escala = ws.max_row
+    linha_inicio_folguistas = ultima_linha_escala + 1
 
-    # Título da escala de folguistas
-    ws_folguistas.merge_cells('A1:Z1')
-    ws_folguistas['A1'] = f"Escala de Folguistas - {empresa_nome} - {mes_ano}"
-    ws_folguistas['A1'].font = titulo_font
-    ws_folguistas['A1'].alignment = Alignment(horizontal='center', vertical='center')
+    # Primeira linha abaixo da escala principal (mesclada e com altura de 15)
+    ws.merge_cells(f'A{linha_inicio_folguistas}:AF{linha_inicio_folguistas}')
+    ws.row_dimensions[linha_inicio_folguistas].height = 15
+
+    # Segunda linha com o título da escala de folguistas (mesclada e com altura de 32)
+    linha_titulo_folguistas = linha_inicio_folguistas + 1
+    ws.merge_cells(f'A{linha_titulo_folguistas}:AF{linha_titulo_folguistas}')
+    ws[f'A{linha_titulo_folguistas}'] = "Escala de Folguistas"
+    ws[f'A{linha_titulo_folguistas}'].font = titulo_font
+    ws[f'A{linha_titulo_folguistas}'].alignment = Alignment(horizontal='center', vertical='center')
+    ws.row_dimensions[linha_titulo_folguistas].height = 32
 
     if not df_folguistas.empty:
         # Cabeçalho da escala de folguistas
+        linha_cabecalho_folguistas = linha_titulo_folguistas + 1
         for col, header in enumerate(df_folguistas.columns, start=1):
-            ws_folguistas.cell(row=3, column=col, value=header)
+            cell = ws.cell(row=linha_cabecalho_folguistas, column=col, value=header)
+            cell.font = Font(size=10, bold=True)  # Tamanho 10 e negrito
+        
+        # Definir altura da linha de cabeçalho dos folguistas para 15
+        ws.row_dimensions[linha_cabecalho_folguistas].height = 15
 
         # Dados da escala de folguistas
-        for row, data in enumerate(df_folguistas.itertuples(index=False), start=4):
+        for row, data in enumerate(df_folguistas.itertuples(index=False), start=linha_cabecalho_folguistas + 1):
             for col, value in enumerate(data, start=1):
-                ws_folguistas.cell(row=row, column=col, value=value)
+                ws.cell(row=row, column=col, value=value)
 
-        configurar_celulas(ws_folguistas, df_folguistas)
+        configurar_celulas(ws, df_folguistas, linha_inicio=linha_cabecalho_folguistas, 
+                           linha_inicio_folguistas=linha_inicio_folguistas, 
+                           linha_titulo_folguistas=linha_titulo_folguistas,
+                           linha_cabecalho_folguistas=linha_cabecalho_folguistas)
     else:
-        ws_folguistas.cell(row=3, column=1, value="Nenhuma escala de folguistas disponível")
+        ws.cell(row=linha_titulo_folguistas + 1, column=1, value="Nenhuma escala de folguistas disponível")
 
     # Salvar o arquivo Excel
     excel_file = BytesIO()
