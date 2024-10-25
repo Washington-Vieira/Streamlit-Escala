@@ -1,7 +1,7 @@
 import pandas as pd
 
 def transformar_escala_para_dataframe(escala_por_funcao, num_dias_no_mes):
-    colunas = ['Funcionário'] + [f'Dia {i+1}' for i in range(num_dias_no_mes)]
+    colunas = ['Funcionário'] + [str(i+1) for i in range(num_dias_no_mes)]
     dados = []
 
     for funcao, escala in escala_por_funcao.items():
@@ -20,4 +20,4 @@ funcoes_familias = {
     "Zelador": "Z"
 }
 
-turnos_funcionarios = ["Turno 1", "Turno 2", "Turno 3"]
+turnos_funcionarios = ["T1", "T2", "T3"]

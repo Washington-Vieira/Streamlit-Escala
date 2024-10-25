@@ -62,7 +62,7 @@ class Funcionario:
 class Empresa:
     def __init__(self, nome):
         self.nome = nome
-        self.funcionarios = {'Turno 1': [], 'Turno 2': [], 'Turno 3': []}
+        self.funcionarios = {'T1': [], 'T2': [], 'T3': []}
         self.funcionarios_em_ferias = []
         self.folguistas = []
         self.folguistas_escala = []
