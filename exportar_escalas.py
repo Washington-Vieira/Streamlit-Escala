@@ -66,7 +66,7 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
                 cell.font = Font(size=10, bold=True)
 
         # Aplicar formatação condicional
-        verde = PatternFill(start_color='67CB57', end_color='67CB57', fill_type='solid')
+        verde = PatternFill(start_color='00B050', end_color='00B050', fill_type='solid')
         laranja = PatternFill(start_color='FF6400', end_color='FF6400', fill_type='solid')
 
         # Aplicar regra para "folga"

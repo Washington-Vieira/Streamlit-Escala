@@ -32,8 +32,8 @@ def app():
             st.success('Alterações na escala de folguistas salvas com sucesso!')
 
         # Adicionar botão de exportação
-        df_escala_final = pd.DataFrame()  # DataFrame vazio para a escala final
-        adicionar_botao_exportacao(df_escala_final, df_folguistas_editado, empresa_selecionada)
+        # df_escala_final = pd.DataFrame()  # DataFrame vazio para a escala final
+        # adicionar_botao_exportacao(df_escala_final, df_folguistas_editado, empresa_selecionada)
 
     else:
         st.warning('Selecione uma empresa para exibir a escala de folguistas.')
