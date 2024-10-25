@@ -4,6 +4,7 @@ import calendar
 from datetime import datetime
 from escala_generator import gerar_escala_turnos_por_funcao
 from utils import transformar_escala_para_dataframe, turnos_funcionarios
+from exportar_escalas import adicionar_botao_exportacao
 
 def app():
     st.title('Geração de Escala')
@@ -59,5 +60,9 @@ def app():
             st.write("Visualização da escala final:")
             st.dataframe(df_final, hide_index=True)
             
+            # Adicionar botão de exportação
+            df_folguistas = pd.DataFrame(st.session_state.empresas[empresa_selecionada].folguistas_escala)
+            adicionar_botao_exportacao(df_final, df_folguistas, empresa_selecionada)
+        
     else:
         st.warning('Selecione uma empresa com funcionários cadastrados para gerar a escala.')

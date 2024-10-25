@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from data_manager import salvar_empresas
+from exportar_escalas import adicionar_botao_exportacao
 
 def app():
     st.title('Escala de Folguistas')
@@ -30,17 +31,9 @@ def app():
             salvar_empresas(st.session_state.empresas)
             st.success('Alterações na escala de folguistas salvas com sucesso!')
 
-        # Adicionar opção de exportação
-        if st.button('Exportar Escala'):
-            if not df_folguistas_editado.empty:
-                csv = df_folguistas_editado.to_csv(index=False)
-                st.download_button(
-                    label="Download CSV",
-                    data=csv,
-                    file_name="escala_folguistas.csv",
-                    mime="text/csv",
-                )
-            else:
-                st.warning('Não há dados para exportar.')
+        # Adicionar botão de exportação
+        df_escala_final = pd.DataFrame()  # DataFrame vazio para a escala final
+        adicionar_botao_exportacao(df_escala_final, df_folguistas_editado, empresa_selecionada)
+
     else:
         st.warning('Selecione uma empresa para exibir a escala de folguistas.')
