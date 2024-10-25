@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from openpyxl import Workbook
-from openpyxl.styles import Alignment, Font, Border, Side
+from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
+from openpyxl.formatting.rule import CellIsRule
 from openpyxl.utils import get_column_letter
 from io import BytesIO
 from datetime import datetime
@@ -63,6 +64,18 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
         for col in worksheet.iter_cols(min_row=3, max_row=3):
             for cell in col:
                 cell.font = Font(size=10, bold=True)
+
+        # Aplicar formatação condicional
+        verde = PatternFill(start_color='67CB57', end_color='67CB57', fill_type='solid')
+        laranja = PatternFill(start_color='FF6400', end_color='FF6400', fill_type='solid')
+
+        # Aplicar regra para "folga"
+        worksheet.conditional_formatting.add(f'B4:{get_column_letter(worksheet.max_column)}{worksheet.max_row}',
+                                             CellIsRule(operator='equal', formula=['"folga"'], fill=verde))
+
+        # Aplicar regra para "folga (domingo)"
+        worksheet.conditional_formatting.add(f'B4:{get_column_letter(worksheet.max_column)}{worksheet.max_row}',
+                                             CellIsRule(operator='equal', formula=['"folga (domingo)"'], fill=laranja))
 
     # Remover bordas internas da linha 2
     no_border = Border(left=Side(style=None), 
