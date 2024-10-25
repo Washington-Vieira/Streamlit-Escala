@@ -22,10 +22,17 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
     border = Border(left=Side(style='thin'), right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
 
     # Título
-    ws.merge_cells('A1:Z1')
+    ws.merge_cells('A1:AF1')
     ws['A1'] = f"Escala de Trabalho - {empresa_nome} - {mes_ano}"
     ws['A1'].font = titulo_font
     ws['A1'].alignment = Alignment(horizontal='center', vertical='center')
+
+    # Mesclar células da linha 2
+    ws.merge_cells('A2:AF2')
+    
+    # Ajustar o alinhamento da célula mesclada (opcional)
+    merged_cell = ws['A2']
+    merged_cell.alignment = Alignment(horizontal='center', vertical='center')
 
     # Função para configurar dimensões e estilos das células
     def configurar_celulas(worksheet, df):
@@ -57,15 +64,30 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
             for cell in col:
                 cell.font = Font(size=10, bold=True)
 
-    # Remover todas as bordas da linha 2
+    # Remover bordas internas da linha 2
     no_border = Border(left=Side(style=None), 
                        right=Side(style=None), 
                        top=Side(style=None), 
                        bottom=Side(style=None))
-    
-    for col in ws.iter_cols(min_row=2, max_row=2):
-        for cell in col:
+
+    for col in range(1, ws.max_column + 1):
+        cell = ws.cell(row=2, column=col)
+        if col == 1:
+            # Manter borda esquerda para a primeira coluna
+            cell.border = Border(left=Side(style='thin'), right=Side(style=None), 
+                                 top=Side(style=None), bottom=Side(style=None))
+        elif col == ws.max_column:
+            # Manter borda direita para a última coluna
+            cell.border = Border(left=Side(style=None), right=Side(style='thin'), 
+                                 top=Side(style=None), bottom=Side(style=None))
+        else:
+            # Remover todas as bordas para as colunas do meio
             cell.border = no_border
+
+    # Ajustar o tamanho da fonte da linha 3 para 10 e manter em negrito
+    for col in ws.iter_cols(min_row=3, max_row=3):
+        for cell in col:
+            cell.font = Font(size=10, bold=True)
 
     # Escala de trabalho
     if not df_escala_final.empty:
