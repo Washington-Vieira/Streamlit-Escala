@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from database.config import get_session
 from database.crud import DatabaseManager
 from database.models import Ferias
+from exportar_relatorio_ferias import adicionar_botao_exportacao_ferias
 
 def app():
     st.title('Gerenciar Férias de Funcionários')
@@ -98,26 +99,7 @@ def app():
                 st.info("Não há funcionários em férias no momento.")
 
             st.markdown("## Histórico de Férias")
-            # Buscar apenas funcionários que têm histórico de férias
-            funcionarios_com_historico = session.query(Ferias.funcionario_id).distinct().all()
-            funcionarios_com_historico_ids = [f[0] for f in funcionarios_com_historico]
-            
-            funcionarios_filtrados = [f for f in todos_funcionarios if f.id in funcionarios_com_historico_ids]
-            
-            if funcionarios_filtrados:
-                for funcionario in funcionarios_filtrados:
-                    historico = session.query(Ferias).filter(
-                        Ferias.funcionario_id == funcionario.id
-                    ).order_by(Ferias.data_inicio.desc()).all()
-                    
-                    with st.expander(f"{funcionario.nome}"):
-                        for ferias in historico:
-                            st.write(f"De {ferias.data_inicio} a {ferias.data_fim}")
-                            if ferias.ativa:
-                                st.write("*(Férias em andamento)*")
-                            st.markdown("---")
-            else:
-                st.info("Nenhum funcionário possui histórico de férias.")
+            adicionar_botao_exportacao_ferias(session, empresa_selecionada)
         else:
             st.warning('Não há funcionários cadastrados para esta empresa.')
     else:
