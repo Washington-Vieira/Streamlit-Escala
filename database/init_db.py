@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, create_engine, Session
 from config import engine
-from models import Empresa, Funcionario, Folguista, Ferias, EscalaFolguista
+from models import Empresa, Funcionario, Folguista, Ferias, Atestado, EscalaFolguista
 import logging
 from sqlalchemy import text
 
