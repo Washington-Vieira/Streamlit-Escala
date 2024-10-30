@@ -1,7 +1,7 @@
 import json
 import os
 import streamlit as st
-from models import Empresa, Funcionario
+from modelsss import Empresa, Funcionario
 from datetime import datetime, date
 
 # Atualize o caminho do arquivo

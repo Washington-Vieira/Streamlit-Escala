@@ -1,65 +1,43 @@
 import streamlit as st
-import calendar
 from datetime import datetime
-from data_manager import salvar_empresas
-from models import Funcionario
+from database.config import get_session
+from database.models import Folguista
+from database.crud import DatabaseManager
 
 def app():
     st.title('Cadastro de Folguistas')
     
-    empresa_selecionada = st.selectbox('Selecione a Empresa', options=list(st.session_state.empresas.keys()))
+    session = next(get_session())
+    db = DatabaseManager(session)
+    
+    # Lista de empresas para seleção
+    empresas = db.listar_empresas()
+    empresa_options = {empresa.nome: empresa.id for empresa in empresas}
+    
+    empresa_selecionada = st.selectbox('Selecione a Empresa', options=list(empresa_options.keys()))
     nome_folguista = st.text_input('Nome do Folguista')
     
     if st.button('Cadastrar Folguista'):
         if empresa_selecionada and nome_folguista:
-            empresa = st.session_state.empresas[empresa_selecionada]
-            
-            data_atual = datetime.now()
-            num_dias_no_mes = calendar.monthrange(data_atual.year, data_atual.month)[1]
-            
-            if empresa.folguistas_escala is None:
-                empresa.folguistas_escala = []
-            
-            # Criar um novo folguista com valores padrão
-            novo_folguista = Funcionario(
+            novo_folguista = Folguista(
                 nome=nome_folguista,
                 funcao="Folguista",
                 familia_letras="CP",
                 horario_turno="Variável",
-                data_inicio=data_atual.date(),
-                turno="Variável"
+                data_inicio=datetime.now().date(),
+                turno="Variável",
+                empresa_id=empresa_options[empresa_selecionada],
+                em_ferias=False
             )
-            empresa.folguistas.append(novo_folguista)
             
-            # Atualizar a escala de folguistas
-            folguista_escala = {'Folguista': f"{nome_folguista} (CP)"}
-            folguista_escala.update({f'Dia {i+1}': '' for i in range(num_dias_no_mes)})
-            empresa.folguistas_escala.append(folguista_escala)
-            
-            salvar_empresas(st.session_state.empresas)
-            st.success(f'Folguista {nome_folguista} (CP) cadastrado na empresa {empresa_selecionada}!')
+            db.criar_folguista(novo_folguista)
+            st.success(f'Folguista {nome_folguista} cadastrado com sucesso!')
         else:
             st.error('Por favor, preencha todos os campos.')
 
-    # Seção de exclusão de folguista
-    st.markdown("---")
-    with st.expander("Excluir Folguista"):
-        st.subheader('Excluir Folguista')
-        st.warning('Esta ação é irreversível. Por favor, confirme antes de prosseguir.', icon="⚠️")
-        if empresa_selecionada:
-            empresa = st.session_state.empresas[empresa_selecionada]
-            folguistas = empresa.folguistas
-            folguista_para_excluir = st.selectbox('Selecione o Folguista para Excluir', options=[f.nome for f in folguistas])
-
-            if st.checkbox('Confirmar exclusão', key='confirm_excluir_folguista'):
-                if st.button('Excluir Folguista', key='botao_excluir_folguista'):
-                    for folguista in folguistas:
-                        if folguista.nome == folguista_para_excluir:
-                            folguistas.remove(folguista)
-                            # Remover o folguista da escala
-                            empresa.remover_folguista_da_escala(folguista)
-                            salvar_empresas(st.session_state.empresas)
-                            st.success(f'Folguista {folguista_para_excluir} excluído com sucesso!')
-                            st.rerun()
-            else:
-                st.error('Marque a caixa de confirmação para excluir.', icon="⚠️")
+    # Lista de folguistas da empresa selecionada
+    if empresa_selecionada:
+        st.subheader(f"Folguistas de {empresa_selecionada}")
+        folguistas = db.listar_folguistas_por_empresa(empresa_options[empresa_selecionada])
+        for folg in folguistas:
+            st.write(f"- {folg.nome}")

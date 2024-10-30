@@ -12,6 +12,9 @@ reportlab = "^4.2.5"
 streamlit = "^1.39.0"
 pyproject-toml = "^0.0.10"
 openpyxl = "^3.1.5"
+python-dotenv = "^1.0.1"
+psycopg2-binary = "^2.9.10"
+sqlmodel = "^0.0.22"
 
 
 [build-system]

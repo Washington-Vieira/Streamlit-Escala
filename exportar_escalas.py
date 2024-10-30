@@ -42,14 +42,14 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
         for col in worksheet.columns:
             col_letter = get_column_letter(col[0].column)
             if col[0].column == 1:  # Coluna dos nomes
-                worksheet.column_dimensions[col_letter].width = 20  # Ajuste conforme necessário
+                worksheet.column_dimensions[col_letter].width = 20
             else:  # Colunas dos dias
                 worksheet.column_dimensions[col_letter].width = 6
 
         # Configurar altura das linhas
-        for row in range(linha_inicio, worksheet.max_row + 1):  # Linhas de dados
+        for row in range(linha_inicio, worksheet.max_row + 1):
             if linha_inicio_folguistas is None or linha_titulo_folguistas is None or linha_cabecalho_folguistas is None or \
-               row not in [linha_inicio_folguistas, linha_titulo_folguistas, linha_cabecalho_folguistas]:  # Não alterar as linhas especiais
+               row not in [linha_inicio_folguistas, linha_titulo_folguistas, linha_cabecalho_folguistas]:
                 worksheet.row_dimensions[row].height = 50.25
 
         # Aplicar estilos
@@ -81,11 +81,13 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
                                              CellIsRule(operator='equal', formula=['"folga (domingo)"'], fill=laranja))
 
         # Identificar e pintar os sábados de azul
-        for col in range(2, worksheet.max_column + 1):  # Começando da coluna B
-            if worksheet.cell(row=3, column=col).value.lower().startswith('sáb'):
-                for row in range(4, worksheet.max_row + 1):
-                    cell = worksheet.cell(row=row, column=col)
-                    cell.fill = azul
+        for col in range(2, worksheet.max_column + 1):
+            cell_value = worksheet.cell(row=3, column=col).value
+            if cell_value and isinstance(cell_value, str):
+                if 'sáb' in cell_value.lower():
+                    for row in range(4, worksheet.max_row + 1):
+                        cell = worksheet.cell(row=row, column=col)
+                        cell.fill = azul
 
     # Remover bordas internas da linha 2
     no_border = Border(left=Side(style=None), 
@@ -146,17 +148,30 @@ def exportar_escalas_para_excel(df_escala_final, df_folguistas, empresa_nome, me
     if not df_folguistas.empty:
         # Cabeçalho da escala de folguistas
         linha_cabecalho_folguistas = linha_titulo_folguistas + 1
+        
+        # Adicionar cabeçalhos
         for col, header in enumerate(df_folguistas.columns, start=1):
             cell = ws.cell(row=linha_cabecalho_folguistas, column=col, value=header)
-            cell.font = Font(size=10, bold=True)  # Tamanho 10 e negrito
+            cell.font = Font(size=10, bold=True)
+            cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
         
         # Definir altura da linha de cabeçalho dos folguistas para 15
         ws.row_dimensions[linha_cabecalho_folguistas].height = 15
 
         # Dados da escala de folguistas
-        for row, data in enumerate(df_folguistas.itertuples(index=False), start=linha_cabecalho_folguistas + 1):
-            for col, value in enumerate(data, start=1):
-                ws.cell(row=row, column=col, value=value)
+        for row_idx, row in df_folguistas.iterrows():
+            excel_row = linha_cabecalho_folguistas + 1 + row_idx
+            for col_idx, value in enumerate(row):
+                cell = ws.cell(row=excel_row, column=col_idx + 1)
+                cell.value = str(value) if pd.notna(value) else ''
+                cell.alignment = Alignment(horizontal='center', vertical='center', wrap_text=True)
+                
+                # Aplicar formatação condicional para folgas
+                if isinstance(value, str) and 'folga' in value.lower():
+                    if 'domingo' in value.lower():
+                        cell.fill = PatternFill(start_color='FF6400', end_color='FF6400', fill_type='solid')
+                    else:
+                        cell.fill = PatternFill(start_color='00B050', end_color='00B050', fill_type='solid')
 
         configurar_celulas(ws, df_folguistas, linha_inicio=linha_cabecalho_folguistas, 
                            linha_inicio_folguistas=linha_inicio_folguistas, 

@@ -1,58 +1,52 @@
 import streamlit as st
-from datetime import datetime
-from data_manager import salvar_empresas
-from models import Funcionario
+from datetime import datetime, time
+from database.config import get_session
+from database.models import Funcionario
+from database.crud import DatabaseManager
 from utils import funcoes_familias, turnos_funcionarios
 
 def app():
     st.title('Cadastro de Funcionários')
     
-    empresa_selecionada = st.selectbox('Selecione a Empresa', options=list(st.session_state.empresas.keys()))
+    session = next(get_session())
+    db = DatabaseManager(session)
+    
+    # Lista de empresas para seleção
+    empresas = db.listar_empresas()
+    empresa_options = {empresa.nome: empresa.id for empresa in empresas}
+    
+    empresa_selecionada = st.selectbox('Selecione a Empresa', options=list(empresa_options.keys()))
     nome_funcionario = st.text_input('Nome do Funcionário')
     turno_funcionario = st.selectbox('Selecione o Turno', options=turnos_funcionarios)
     funcao_funcionario = st.selectbox('Selecione a Função', options=list(funcoes_familias.keys()))
     familia_letras = funcoes_familias[funcao_funcionario]
-    hora_inicio = st.time_input('Hora de Início do Turno', value=datetime.strptime("06:00", "%H:%M").time())
-    hora_fim = st.time_input('Hora de Fim do Turno', value=datetime.strptime("14:00", "%H:%M").time())
+    hora_inicio = st.time_input('Hora de Início do Turno', value=time(6, 0))
+    hora_fim = st.time_input('Hora de Fim do Turno', value=time(14, 0))
     data_inicio = st.date_input('Data de Início', value=datetime.today())
 
     if st.button('Cadastrar Funcionário'):
-        if all([nome_funcionario, funcao_funcionario, familia_letras, hora_inicio.strftime('%H:%M'), hora_fim.strftime('%H:%M'), data_inicio.strftime('%Y-%m-%d'), turno_funcionario, empresa_selecionada]):
-            data_inicio_datetime = datetime.combine(data_inicio, datetime.min.time())
+        if all([nome_funcionario, funcao_funcionario, empresa_selecionada]):
+            horario_turno = f"{hora_inicio.strftime('%H:%M')} as {hora_fim.strftime('%H:%M')}"
+            
             novo_funcionario = Funcionario(
-                nome_funcionario,
-                funcao_funcionario,
-                familia_letras,
-                f"{hora_inicio.strftime('%H:%M')} as {hora_fim.strftime('%H:%M')}",
-                data_inicio_datetime,
-                turno_funcionario
+                nome=nome_funcionario,
+                funcao=funcao_funcionario,
+                familia_letras=familia_letras,
+                horario_turno=horario_turno,
+                data_inicio=data_inicio,
+                turno=turno_funcionario,
+                empresa_id=empresa_options[empresa_selecionada],
+                em_ferias=False
             )
-            st.session_state.empresas[empresa_selecionada].adicionar_funcionario(novo_funcionario)
-            salvar_empresas(st.session_state.empresas)
-            st.success(f'Funcionário {nome_funcionario} cadastrado com sucesso na empresa {empresa_selecionada}!')
+            
+            db.criar_funcionario(novo_funcionario)
+            st.success(f'Funcionário {nome_funcionario} cadastrado com sucesso!')
         else:
             st.error('Por favor, preencha todos os campos.')
 
-    # Seção de exclusão de funcionário
-    st.markdown("---")
-    with st.expander("Excluir Funcionário"):
-        st.subheader('Excluir Funcionário')
-        st.warning('Esta ação é irreversível. Por favor, confirme antes de prosseguir.', icon="⚠️")
-        if empresa_selecionada:
-            funcionarios = st.session_state.empresas[empresa_selecionada].funcionarios
-            todos_funcionarios = [func for turno in funcionarios.values() for func in turno]
-            funcionario_para_excluir = st.selectbox('Selecione o Funcionário para Excluir', options=[f.nome for f in todos_funcionarios])
-
-            if st.checkbox('Confirmar exclusão', key='confirm_excluir_funcionario'):
-                if st.button('Excluir Funcionário', key='botao_excluir_funcionario'):
-                    for turno, lista_funcionarios in funcionarios.items():
-                        for func in lista_funcionarios:
-                            if func.nome == funcionario_para_excluir:
-                                lista_funcionarios.remove(func)
-                                # Remover o funcionário da escala
-                                st.session_state.empresas[empresa_selecionada].remover_funcionario_da_escala(func)
-                                salvar_empresas(st.session_state.empresas)
-                                st.success(f'Funcionário {funcionario_para_excluir} excluído com sucesso!')
-                                st.rerun()
-            else:
-                st.error('Marque a caixa de confirmação para excluir.', icon="⚠️")
+    # Lista de funcionários da empresa selecionada
+    if empresa_selecionada:
+        st.subheader(f"Funcionários de {empresa_selecionada}")
+        funcionarios = db.listar_funcionarios_por_empresa(empresa_options[empresa_selecionada])
+        for func in funcionarios:
+            st.write(f"- {func.nome} ({func.funcao})")

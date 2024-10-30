@@ -1,2 +1,22 @@
 .venv
 empresas.json
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Outros arquivos e diretórios que já devem estar no .gitignore
+# Ambiente virtual
+venv/
+env/
+
+# Arquivos de ambiente
+.env
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Outros arquivos que devem ser ignorados
+.DS_Store
+*.log
