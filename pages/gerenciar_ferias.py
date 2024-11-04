@@ -5,6 +5,7 @@ from database.crud import DatabaseManager
 from database.models import Ferias, Atestado
 from exportar_relatorio_ferias import adicionar_botao_exportacao_ferias
 from exportar_relatorio_atestados import exportar_relatorio_atestados
+import pandas as pd
 
 def app():
     st.title('Gerenciar Férias e Atestados')
@@ -70,6 +71,8 @@ def app():
                             
                             st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}')
                             st.rerun()
+                            # Atualizar a escala de trabalho
+                            atualizar_escala(funcionario.id, data_inicio_ferias, data_fim_ferias, "Férias")
 
                 st.markdown("## Funcionários em Férias")
                 funcionarios_em_ferias = [f for f in todos_funcionarios if f.em_ferias]
@@ -155,6 +158,8 @@ def app():
                             
                             st.success(f'Atestado registrado para {funcionario_selecionado} de {data_inicio_atestado} a {data_fim_atestado}')
                             st.rerun()
+                            # Atualizar a escala de trabalho
+                            atualizar_escala(funcionario.id, data_inicio_atestado, data_fim_atestado, "Atestado")
 
                 st.markdown("## Atestados Ativos")
                 atestados_ativos = session.query(Atestado).filter(
@@ -200,3 +205,15 @@ def app():
             st.warning('Não há funcionários cadastrados para esta empresa.')
     else:
         st.warning('Selecione uma empresa para gerenciar férias.')
+
+def atualizar_escala(funcionario_id, data_inicio, data_fim, tipo):
+    """Atualiza a escala de trabalho com os dias de férias ou atestado."""
+    if 'escala_folguistas' in st.session_state:
+        df = st.session_state.escala_folguistas
+        for dia in pd.date_range(start=data_inicio, end=data_fim):
+            dia_str = f'Dia {dia.day}'
+            if dia_str in df.columns:
+                index = df[df['Folguista'].str.contains(funcionario_id)].index
+                if not index.empty:
+                    df.at[index[0], dia_str] = tipo
+        st.session_state.escala_folguistas = df

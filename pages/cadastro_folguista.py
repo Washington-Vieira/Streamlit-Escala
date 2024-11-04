@@ -40,4 +40,17 @@ def app():
         st.subheader(f"Folguistas de {empresa_selecionada}")
         folguistas = db.listar_folguistas_por_empresa(empresa_options[empresa_selecionada])
         for folg in folguistas:
-            st.write(f"- {folg.nome}")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.write(f"- {folg.nome}")
+            with col2:
+                if st.button(f'Excluir {folg.nome}'):
+                    # Alerta de confirmação
+                    if st.session_state.get(f'confirmar_exclusao_{folg.id}', False):
+                        db.session.delete(folg)  # Exclui o folguista
+                        db.session.commit()  # Confirma a exclusão
+                        st.success(f'Folguista {folg.nome} excluído com sucesso!')
+                        st.session_state[f'confirmar_exclusao_{folg.id}'] = False  # Resetar estado
+                    else:
+                        st.session_state[f'confirmar_exclusao_{folg.id}'] = True
+                        st.warning(f'Você tem certeza que deseja excluir o folguista {folg.nome}? Clique novamente para confirmar.')

@@ -36,8 +36,8 @@ class Funcionario(FuncionarioBase, table=True):
     
     # Relacionamentos
     empresa: Optional[Empresa] = Relationship(back_populates="funcionarios")
-    ferias: List["Ferias"] = Relationship(back_populates="funcionario")
-    atestados: List["Atestado"] = Relationship(back_populates="funcionario")
+    ferias: List["Ferias"] = Relationship(back_populates="funcionario", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
+    atestados: List["Atestado"] = Relationship(back_populates="funcionario", sa_relationship_kwargs={"cascade": "all, delete-orphan"})
 
     def to_dict(self):
         return {

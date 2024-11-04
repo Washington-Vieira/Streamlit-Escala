@@ -49,4 +49,17 @@ def app():
         st.subheader(f"Funcionários de {empresa_selecionada}")
         funcionarios = db.listar_funcionarios_por_empresa(empresa_options[empresa_selecionada])
         for func in funcionarios:
-            st.write(f"- {func.nome} ({func.funcao})")
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.write(f"- {func.nome} ({func.funcao})")
+            with col2:
+                if st.button(f'Excluir {func.nome}'):
+                    # Alerta de confirmação
+                    if st.session_state.get(f'confirmar_exclusao_{func.id}', False):
+                        db.session.delete(func)  # Exclui o funcionário
+                        db.session.commit()  # Confirma a exclusão
+                        st.success(f'Funcionário {func.nome} excluído com sucesso!')
+                        st.session_state[f'confirmar_exclusao_{func.id}'] = False  # Resetar estado
+                    else:
+                        st.session_state[f'confirmar_exclusao_{func.id}'] = True
+                        st.warning(f'Você tem certeza que deseja excluir o funcionário {func.nome}? Clique novamente para confirmar.')

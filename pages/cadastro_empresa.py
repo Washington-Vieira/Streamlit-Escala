@@ -28,4 +28,17 @@ def app():
     st.subheader("Empresas Cadastradas")
     empresas = db.listar_empresas()
     for empresa in empresas:
-        st.write(f"- {empresa.nome}")
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.write(f"- {empresa.nome}")
+        with col2:
+            if st.button(f'Excluir {empresa.nome}'):
+                # Alerta de confirmação
+                if st.session_state.get(f'confirmar_exclusao_{empresa.id}', False):
+                    db.session.delete(empresa)  # Exclui a empresa
+                    db.session.commit()  # Confirma a exclusão
+                    st.success(f'Empresa {empresa.nome} excluída com sucesso!')
+                    st.session_state[f'confirmar_exclusao_{empresa.id}'] = False  # Resetar estado
+                else:
+                    st.session_state[f'confirmar_exclusao_{empresa.id}'] = True
+                    st.warning(f'Você tem certeza que deseja excluir a empresa {empresa.nome}? Clique novamente para confirmar.')
