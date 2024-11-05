@@ -3,7 +3,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
 from io import BytesIO
 from datetime import datetime
-from database.models import Ferias, Funcionario, Folguista
+from database.models import Ferias, Funcionario
 
 def exportar_relatorio_ferias(session, empresa_nome):
     """

@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 from typing import List, Optional
-from .models import Empresa, Funcionario, Folguista, Ferias, Atestado
+from .models import Empresa, Funcionario, Ferias, Atestado
 
 class DatabaseManager:
     def __init__(self, session: Session):
@@ -26,18 +26,8 @@ class DatabaseManager:
         self.session.refresh(funcionario)
         return funcionario
 
-    def criar_folguista(self, folguista: Folguista) -> Folguista:
-        self.session.add(folguista)
-        self.session.commit()
-        self.session.refresh(folguista)
-        return folguista
-
     def listar_funcionarios_por_empresa(self, empresa_id: int) -> List[Funcionario]:
         statement = select(Funcionario).where(Funcionario.empresa_id == empresa_id)
-        return self.session.exec(statement).all()
-
-    def listar_folguistas_por_empresa(self, empresa_id: int) -> List[Folguista]:
-        statement = select(Folguista).where(Folguista.empresa_id == empresa_id)
         return self.session.exec(statement).all()
 
     def criar_atestado(self, atestado: Atestado) -> Atestado:
@@ -61,4 +51,23 @@ class DatabaseManager:
         atestado = self.session.get(Atestado, atestado_id)
         if atestado:
             atestado.ativo = False
-            self.session.commit() 
+            self.session.commit()
+
+    def listar_funcionarios_folguistas_por_empresa(self, empresa_id: int) -> List[Funcionario]:
+        statement = select(Funcionario).where(
+            Funcionario.empresa_id == empresa_id,
+            Funcionario.is_folguista == True  # Filtra apenas os folguistas
+        )
+        return self.session.exec(statement).all()
+
+    def listar_funcionarios(self) -> List[Funcionario]:
+        """Retorna uma lista de todos os funcionários."""
+        statement = select(Funcionario)
+        return self.session.exec(statement).all()
+
+    def listar_folguistas_por_empresa(self, empresa_id):
+        """Retorna a lista de folguistas para uma empresa específica."""
+        return self.session.query(Funcionario).filter(
+            Funcionario.empresa_id == empresa_id,
+            Funcionario.is_folguista == True
+        ).all()

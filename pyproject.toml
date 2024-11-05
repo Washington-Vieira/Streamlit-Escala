@@ -1,22 +1,12 @@
 [tool.poetry]
-name = "escala"
+name = "seu_projeto"
 version = "0.1.0"
 description = ""
-authors = ["Washington Vieira <wv817816@gmail.com>"]
-readme = "README.md"
+authors = ["Seu Nome <seu.email@exemplo.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-pandas = "^2.2.3"
-reportlab = "^4.2.5"
-streamlit = "^1.39.0"
-pyproject-toml = "^0.0.10"
-openpyxl = "^3.1.5"
-python-dotenv = "^1.0.1"
-psycopg2-binary = "^2.9.10"
-sqlmodel = "^0.0.22"
-
+python = "^3.8"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

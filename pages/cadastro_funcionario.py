@@ -17,16 +17,36 @@ def app():
     
     empresa_selecionada = st.selectbox('Selecione a Empresa', options=list(empresa_options.keys()))
     nome_funcionario = st.text_input('Nome do Funcionário')
-    turno_funcionario = st.selectbox('Selecione o Turno', options=turnos_funcionarios)
+    
+    # Adicionando "Folguista" à lista de funções
+    funcoes_familias['Folguista'] = 'CP'  # Adiciona a função "Folguista" com uma família de letras padrão
     funcao_funcionario = st.selectbox('Selecione a Função', options=list(funcoes_familias.keys()))
+    
+    # Inicializa as variáveis de horário e turno
+    horario_turno = ""
+    turno_funcionario = ""
+
+    # Se "Folguista" for selecionado, preenche automaticamente os campos
+    if funcao_funcionario == 'Folguista':
+        horario_turno = "Variável"
+        turno_funcionario = "Variável"
+        st.write("Os campos de horário e turno foram preenchidos automaticamente como 'Variável'.")
+    else:
+        # Se não for folguista, permite a seleção de turno
+        turno_funcionario = st.selectbox('Selecione o Turno', options=turnos_funcionarios)
+
+        # Exibe os campos de hora de início e fim do turno
+        hora_inicio = st.time_input('Hora de Início do Turno', value=time(6, 0))
+        hora_fim = st.time_input('Hora de Fim do Turno', value=time(14, 0))
+
     familia_letras = funcoes_familias[funcao_funcionario]
-    hora_inicio = st.time_input('Hora de Início do Turno', value=time(6, 0))
-    hora_fim = st.time_input('Hora de Fim do Turno', value=time(14, 0))
     data_inicio = st.date_input('Data de Início', value=datetime.today())
 
     if st.button('Cadastrar Funcionário'):
         if all([nome_funcionario, funcao_funcionario, empresa_selecionada]):
-            horario_turno = f"{hora_inicio.strftime('%H:%M')} as {hora_fim.strftime('%H:%M')}"
+            # Se não for folguista, formata o horário do turno
+            if funcao_funcionario != 'Folguista':
+                horario_turno = f"{hora_inicio.strftime('%H:%M')} as {hora_fim.strftime('%H:%M')}"
             
             novo_funcionario = Funcionario(
                 nome=nome_funcionario,
@@ -36,7 +56,8 @@ def app():
                 data_inicio=data_inicio,
                 turno=turno_funcionario,
                 empresa_id=empresa_options[empresa_selecionada],
-                em_ferias=False
+                em_ferias=False,
+                is_folguista=(funcao_funcionario == 'Folguista')  # Define is_folguista como True se for folguista
             )
             
             db.criar_funcionario(novo_funcionario)
@@ -63,3 +84,7 @@ def app():
                     else:
                         st.session_state[f'confirmar_exclusao_{func.id}'] = True
                         st.warning(f'Você tem certeza que deseja excluir o funcionário {func.nome}? Clique novamente para confirmar.')
+
+# Chame a função app() para executar a aplicação
+if __name__ == "__main__":
+    app()

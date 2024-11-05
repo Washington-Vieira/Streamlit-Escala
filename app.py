@@ -1,5 +1,5 @@
 import streamlit as st
-from pages import cadastro_empresa, cadastro_funcionario, cadastro_folguista, gerar_escala, gerar_escala_folguista
+from pages import cadastro_empresa, cadastro_funcionario, gerar_escala, gerar_escala_folguista
 from pages.gerenciar_ferias import app as gerenciar_ferias
 from data_manager import carregar_empresas
 
@@ -20,7 +20,6 @@ if 'empresas' not in st.session_state:
 PAGES = {
     "🏢 Cadastro de Empresa": cadastro_empresa,
     "👤 Cadastro de Funcionário": cadastro_funcionario,
-    "🔄 Cadastro de Folguista": cadastro_folguista,
     "🏖️ Gerenciar Férias": gerenciar_ferias,
     "📅 Gerar Escala": gerar_escala,
     "📊 Gerar Escala Folguista": gerar_escala_folguista

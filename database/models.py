@@ -12,7 +12,7 @@ class Empresa(EmpresaBase, table=True):
     
     # Relacionamentos
     funcionarios: List["Funcionario"] = Relationship(back_populates="empresa")
-    folguistas: List["Folguista"] = Relationship(back_populates="empresa")
+    folguistas: List["Funcionario"] = Relationship(back_populates="empresa")
 
 class FuncionarioBase(SQLModel):
     nome: str = Field(index=True)
@@ -23,6 +23,7 @@ class FuncionarioBase(SQLModel):
     turno: str
     empresa_id: int = Field(foreign_key="empresas.id")
     em_ferias: bool = Field(default=False)
+    is_folguista: bool = Field(default=False)
 
     @validator('data_inicio', pre=True)
     def parse_data_inicio(cls, v):
@@ -51,14 +52,6 @@ class Funcionario(FuncionarioBase, table=True):
             'em_ferias': self.em_ferias
         }
 
-class Folguista(FuncionarioBase, table=True):
-    __tablename__ = "folguistas"
-    id: Optional[int] = Field(default=None, primary_key=True)
-    
-    # Relacionamentos
-    empresa: Optional[Empresa] = Relationship(back_populates="folguistas")
-    escalas: List["EscalaFolguista"] = Relationship(back_populates="folguista")
-
 class Ferias(SQLModel, table=True):
     __tablename__ = "ferias"
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -75,18 +68,6 @@ class Ferias(SQLModel, table=True):
         if isinstance(v, str):
             return datetime.strptime(v, '%Y-%m-%d').date()
         return v
-
-class EscalaFolguista(SQLModel, table=True):
-    __tablename__ = "escala_folguistas"
-    id: Optional[int] = Field(default=None, primary_key=True)
-    folguista_id: int = Field(foreign_key="folguistas.id")
-    empresa_id: int = Field(foreign_key="empresas.id")
-    data: date
-    turno: str
-    local: str
-
-    # Relacionamentos
-    folguista: Folguista = Relationship(back_populates="escalas")
 
 class Atestado(SQLModel, table=True):
     __tablename__ = "atestados"
@@ -106,3 +87,10 @@ class Atestado(SQLModel, table=True):
         if isinstance(v, str):
             return datetime.strptime(v, '%Y-%m-%d').date()
         return v
+
+class DatabaseManager:
+    # ... outros métodos ...
+
+    def criar_ferias(self, ferias):
+        self.session.add(ferias)
+        self.session.commit()

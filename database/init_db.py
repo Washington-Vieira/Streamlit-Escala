@@ -1,6 +1,6 @@
 from sqlmodel import SQLModel, create_engine, Session
 from config import engine
-from models import Empresa, Funcionario, Folguista, Ferias, Atestado, EscalaFolguista
+from models import Empresa, Funcionario, Ferias, Atestado
 import logging
 from sqlalchemy import text
 
@@ -12,6 +12,7 @@ def init_db():
         
         # Dropa todas as tabelas existentes e recria
         SQLModel.metadata.drop_all(engine)
+        
         SQLModel.metadata.create_all(engine)
         
         logger.info("Banco de dados criado com sucesso!")

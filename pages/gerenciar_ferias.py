@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 from database.config import get_session
 from database.crud import DatabaseManager
-from database.models import Ferias, Atestado
+from database.models import Funcionario, Ferias, Atestado
 from exportar_relatorio_ferias import adicionar_botao_exportacao_ferias
 from exportar_relatorio_atestados import exportar_relatorio_atestados
 import pandas as pd
@@ -25,20 +25,16 @@ def app():
         
         # Buscar funcionários e folguistas da empresa
         funcionarios = db.listar_funcionarios_por_empresa(empresa_id)
-        folguistas = db.listar_folguistas_por_empresa(empresa_id)
         
-        # Combinar listas de funcionários e folguistas
-        todos_funcionarios = funcionarios + folguistas
-
-        if todos_funcionarios:
+        if funcionarios:
             tab1, tab2 = st.tabs(["Férias", "Atestados"])
             
             with tab1:
                 st.markdown("## Registrar Férias")
                 with st.form("registrar_ferias"):
                     funcionario_selecionado = st.selectbox(
-                        'Selecione o Funcionário',
-                        options=[f.nome for f in todos_funcionarios]
+                        'Selecione o Funcionário ou Folguista',
+                        options=[f.nome for f in funcionarios]
                     )
                     
                     col1, col2 = st.columns(2)
@@ -50,60 +46,62 @@ def app():
                     submit_button = st.form_submit_button("Registrar Férias")
                     
                     if submit_button:
-                        funcionario = next((f for f in todos_funcionarios if f.nome == funcionario_selecionado), None)
+                        funcionario = next((f for f in funcionarios if f.nome == funcionario_selecionado), None)
                         if funcionario:
-                            data_fim_ferias = data_inicio_ferias + timedelta(days=duracao_ferias)
+                            # Verificar se já existe um registro de férias ativo
+                            ferias_ativa = session.query(Ferias).filter(
+                                Ferias.funcionario_id == funcionario.id,
+                                Ferias.ativa == True
+                            ).first()
                             
-                            # Criar novo registro de férias
-                            novas_ferias = Ferias(
-                                funcionario_id=funcionario.id,
-                                data_inicio=data_inicio_ferias,
-                                data_fim=data_fim_ferias,
-                                ativa=True
-                            )
-                            
-                            # Atualizar status do funcionário
-                            funcionario.em_ferias = True
-                            
-                            # Salvar no banco de dados
-                            session.add(novas_ferias)
-                            session.commit()
-                            
-                            st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}')
-                            st.rerun()
-                            # Atualizar a escala de trabalho
-                            atualizar_escala(funcionario.id, data_inicio_ferias, data_fim_ferias, "Férias")
+                            if ferias_ativa:
+                                st.error(f'{funcionario_selecionado} já está em férias de {ferias_ativa.data_inicio} a {ferias_ativa.data_fim}.')
+                            else:
+                                data_fim_ferias = data_inicio_ferias + timedelta(days=duracao_ferias)
+                                
+                                # Criar novo registro de férias
+                                novas_ferias = Ferias(
+                                    funcionario_id=funcionario.id,
+                                    data_inicio=data_inicio_ferias,
+                                    data_fim=data_fim_ferias,
+                                    ativa=True
+                                )
+                                
+                                # Salvar no banco de dados
+                                session.add(novas_ferias)
+                                session.commit()
+                                
+                                st.success(f'Férias registradas para {funcionario_selecionado} de {data_inicio_ferias} a {data_fim_ferias}')
+                                st.rerun()
 
-                st.markdown("## Funcionários em Férias")
-                funcionarios_em_ferias = [f for f in todos_funcionarios if f.em_ferias]
+                st.markdown("## Funcionários e Folguistas em Férias")
+                funcionarios_em_ferias = session.query(Ferias).filter(Ferias.ativa == True).all()
+                
+                # Usar um conjunto para evitar duplicações
+                funcionarios_exibidos = set()
                 
                 if funcionarios_em_ferias:
-                    for funcionario in funcionarios_em_ferias:
-                        # Buscar férias ativas do funcionário
-                        ferias_ativa = session.query(Ferias).filter(
-                            Ferias.funcionario_id == funcionario.id,
-                            Ferias.ativa == True
-                        ).first()
-                        
-                        if ferias_ativa:
+                    for ferias in funcionarios_em_ferias:
+                        funcionario = session.query(Funcionario).get(ferias.funcionario_id)
+                        if funcionario and funcionario.nome not in funcionarios_exibidos:
+                            funcionarios_exibidos.add(funcionario.nome)
                             with st.container():
                                 col1, col2, col3 = st.columns([2, 2, 1])
                                 with col1:
                                     st.markdown(f"**{funcionario.nome}**")
                                 with col2:
-                                    st.write(f"{ferias_ativa.data_inicio} a {ferias_ativa.data_fim}")
+                                    st.write(f"{ferias.data_inicio} a {ferias.data_fim}")
                                 with col3:
-                                    if st.button('Retornar ao Trabalho', key=f'retorno_{funcionario.nome}'):
+                                    if st.button('Retornar ao Trabalho', key=f'retorno_{funcionario.id}'):
                                         # Encerrar férias ativas
-                                        ferias_ativa.ativa = False
-                                        funcionario.em_ferias = False
+                                        ferias.ativa = False
                                         session.commit()
                                         
                                         st.success(f'{funcionario.nome} retornou ao trabalho')
                                         st.rerun()
                             st.markdown("---")
                 else:
-                    st.info("Não há funcionários em férias no momento.")
+                    st.info("Não há funcionários ou folguistas em férias no momento.")
 
                 st.markdown("## Histórico de Férias")
                 adicionar_botao_exportacao_ferias(session, empresa_selecionada)
@@ -113,7 +111,7 @@ def app():
                 with st.form("registrar_atestado"):
                     funcionario_selecionado = st.selectbox(
                         'Selecione o Funcionário',
-                        options=[f.nome for f in todos_funcionarios],
+                        options=[f.nome for f in funcionarios],
                         key="atestado_funcionario"
                     )
                     
@@ -140,36 +138,45 @@ def app():
                     submit_atestado = st.form_submit_button("Registrar Atestado")
                     
                     if submit_atestado:
-                        funcionario = next((f for f in todos_funcionarios if f.nome == funcionario_selecionado), None)
+                        funcionario = next((f for f in funcionarios if f.nome == funcionario_selecionado), None)
                         if funcionario:
-                            data_fim_atestado = data_inicio_atestado + timedelta(days=dias_atestado)
-                            
-                            novo_atestado = Atestado(
-                                funcionario_id=funcionario.id,
-                                data_inicio=data_inicio_atestado,
-                                data_fim=data_fim_atestado,
-                                motivo=motivo,
-                                dias=dias_atestado,
-                                ativo=True
-                            )
-                            
-                            session.add(novo_atestado)
-                            session.commit()
-                            
-                            st.success(f'Atestado registrado para {funcionario_selecionado} de {data_inicio_atestado} a {data_fim_atestado}')
-                            st.rerun()
-                            # Atualizar a escala de trabalho
-                            atualizar_escala(funcionario.id, data_inicio_atestado, data_fim_atestado, "Atestado")
+                            # Verificar se já existe um registro de atestado ativo
+                            atestado_ativo = session.query(Atestado).filter(
+                                Atestado.funcionario_id == funcionario.id,
+                                Atestado.ativo == True
+                            ).first()
+
+                            if atestado_ativo:
+                                st.error(f'{funcionario_selecionado} já possui um atestado ativo de {atestado_ativo.data_inicio} a {atestado_ativo.data_fim}.')
+                            else:
+                                data_fim_atestado = data_inicio_atestado + timedelta(days=dias_atestado)
+                                
+                                novo_atestado = Atestado(
+                                    funcionario_id=funcionario.id,
+                                    data_inicio=data_inicio_atestado,
+                                    data_fim=data_fim_atestado,
+                                    motivo=motivo,
+                                    dias=dias_atestado,
+                                    ativo=True
+                                )
+                                
+                                session.add(novo_atestado)
+                                session.commit()
+                                
+                                st.success(f'Atestado registrado para {funcionario_selecionado} de {data_inicio_atestado} a {data_fim_atestado}')
+                                st.rerun()
+                                # Atualizar a escala de trabalho
+                                atualizar_escala(funcionario.id, data_inicio_atestado, data_fim_atestado, "Atestado")
 
                 st.markdown("## Atestados Ativos")
                 atestados_ativos = session.query(Atestado).filter(
                     Atestado.ativo == True,
-                    Atestado.funcionario_id.in_([f.id for f in todos_funcionarios])
+                    Atestado.funcionario_id.in_([f.id for f in funcionarios])
                 ).all()
                 
                 if atestados_ativos:
                     for atestado in atestados_ativos:
-                        funcionario = next((f for f in todos_funcionarios if f.id == atestado.funcionario_id), None)
+                        funcionario = next((f for f in funcionarios if f.id == atestado.funcionario_id), None)
                         if funcionario:
                             with st.container():
                                 col1, col2, col3, col4 = st.columns([2, 2, 2, 1])

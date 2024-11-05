@@ -61,29 +61,6 @@ def app():
                     st.session_state.escala_folguistas = df_editado
                     st.success('Alterações salvas com sucesso!')
             
-            # with col2:
-            #     if st.button('Exportar para Excel'):
-            #         if 'escala_folguistas' in st.session_state:
-            #             try:
-            #                 df_vazio = pd.DataFrame()
-            #                 excel_file = exportar_escalas_para_excel(
-            #                     df_vazio, 
-            #                     st.session_state.escala_folguistas,
-            #                     empresa_selecionada,
-            #                     f"{calendar.month_name[hoje.month]} {hoje.year}"
-            #                 )
-                            
-            #                 st.download_button(
-            #                     label="Baixar Excel",
-            #                     data=excel_file,
-            #                     file_name=f"escala_folguistas_{empresa_selecionada}_{hoje.strftime('%B_%Y')}.xlsx",
-            #                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            #                 )
-            #             except Exception as e:
-            #                 st.error(f"Erro ao exportar: {str(e)}")
-            #         else:
-            #             st.warning("Por favor, salve as alterações antes de exportar.")
-            
             with col3:
                 if st.button('Limpar Escala'):
                     if 'escala_folguistas' in st.session_state:
