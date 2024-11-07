@@ -22,15 +22,17 @@ def gerar_escala_turnos_por_funcao(funcionarios_por_funcao, data_inicio, ferias,
     num_dias_no_mes = calendar.monthrange(data_atual.year, data_atual.month)[1]
 
     for funcao, funcionarios in funcionarios_por_funcao.items():
-        escala = {nome: [] for nome in funcionarios.keys() if nome not in ferias}
+        # Filtra funcionários que não estão de férias ou atestado
+        funcionarios_ativos = {nome: dados for nome, dados in funcionarios.items() 
+                             if nome not in ferias}
         
-        domingos_folga = {nome: domingos[i % len(domingos)] for i, nome in enumerate(funcionarios.keys())}
+        escala = {nome: [] for nome in funcionarios_ativos.keys()}
+        
+        domingos_folga = {nome: domingos[i % len(domingos)] for i, nome in enumerate(funcionarios_ativos.keys())}
 
-        for i, nome in enumerate(funcionarios.keys()):
-            if nome in ferias:
-                continue
-            turno_atual = funcionarios[nome]['turno']
-            horario_atual = funcionarios[nome]['horario']
+        for i, nome in enumerate(funcionarios_ativos.keys()):
+            turno_atual = funcionarios_ativos[nome]['turno']
+            horario_atual = funcionarios_ativos[nome]['horario']
 
             inicio_folga = (i // (dias_trabalho + dias_folga)) * (dias_trabalho + dias_folga) + (i % (dias_trabalho + dias_folga))
             domingo_folga = domingos_folga[nome]

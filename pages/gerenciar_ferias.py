@@ -67,6 +67,9 @@ def app():
                                     ativa=True
                                 )
                                 
+                                # Atualizar status do funcionário
+                                db.atualizar_status_ferias(funcionario.id, True)
+                                
                                 # Salvar no banco de dados
                                 session.add(novas_ferias)
                                 session.commit()

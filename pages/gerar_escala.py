@@ -27,13 +27,20 @@ def app():
         empresa_id = empresa_options[empresa_selecionada]
         funcionarios = db.listar_funcionarios_por_empresa(empresa_id)
         
-        if funcionarios:
+        # Melhorar a lógica de filtro de funcionários ativos
+        funcionarios_ativos = []
+        for f in funcionarios:
+            status = db.verificar_status_funcionario(f.id)
+            if not status["em_ferias"] and not status["em_atestado"]:
+                funcionarios_ativos.append(f)
+
+        if funcionarios_ativos:
             lista_dataframes = []
 
-            # Agrupa funcionários por turno
+            # Agrupa funcionários por turno (apenas ativos)
             funcionarios_por_turno = {}
             for turno in turnos_funcionarios:
-                funcionarios_por_turno[turno] = [f for f in funcionarios if f.turno == turno]
+                funcionarios_por_turno[turno] = [f for f in funcionarios_ativos if f.turno == turno]
 
             for turno in turnos_funcionarios:
                 st.subheader(f'Escala {turno} - {empresa_selecionada}')
@@ -41,19 +48,22 @@ def app():
 
                 if funcionarios_turno:
                     funcionarios_por_funcao = {}
-                    ferias = []  # Lista de funcionários de férias
+                    ferias = []  # Lista de funcionários de férias/atestado
                     
+                    # Atualizar a lógica de construção do dicionário de funcionários
                     for func in funcionarios_turno:
-                        funcao = func.funcao
-                        nome = f"{func.nome} ({func.familia_letras})"
-                        if funcao not in funcionarios_por_funcao:
-                            funcionarios_por_funcao[funcao] = {}
-                        funcionarios_por_funcao[funcao][nome] = {
-                            'horario': func.horario_turno,
-                            'data_inicio': func.data_inicio,
-                            'turno': func.turno
-                        }
-                        if func.em_ferias:  # Agora usa o campo do banco
+                        status = db.verificar_status_funcionario(func.id)
+                        if not status["em_ferias"] and not status["em_atestado"]:
+                            funcao = func.funcao
+                            nome = f"{func.nome} ({func.familia_letras})"
+                            if funcao not in funcionarios_por_funcao:
+                                funcionarios_por_funcao[funcao] = {}
+                            funcionarios_por_funcao[funcao][nome] = {
+                                'horario': func.horario_turno,
+                                'data_inicio': func.data_inicio,
+                                'turno': func.turno
+                            }
+                        else:
                             ferias.append(func.nome)
 
                     escala_por_funcao = gerar_escala_turnos_por_funcao(

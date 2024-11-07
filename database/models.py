@@ -52,6 +52,9 @@ class Funcionario(FuncionarioBase, table=True):
             'em_ferias': self.em_ferias
         }
 
+    def atualizar_status_ferias(self, em_ferias: bool):
+        self.em_ferias = em_ferias
+
 class Ferias(SQLModel, table=True):
     __tablename__ = "ferias"
     id: Optional[int] = Field(default=None, primary_key=True)

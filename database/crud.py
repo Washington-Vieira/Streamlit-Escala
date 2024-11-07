@@ -1,6 +1,7 @@
 from sqlmodel import Session, select
 from typing import List, Optional
 from .models import Empresa, Funcionario, Ferias, Atestado
+from datetime import datetime
 
 class DatabaseManager:
     def __init__(self, session: Session):
@@ -76,3 +77,37 @@ class DatabaseManager:
         """Retorna um dicionário com os horários dos funcionários de uma empresa específica."""
         funcionarios = self.session.query(Funcionario).filter(Funcionario.empresa_id == empresa_id).all()
         return {funcionario.id: funcionario.horario_turno for funcionario in funcionarios}
+
+    def atualizar_status_ferias(self, funcionario_id: int, em_ferias: bool):
+        """Atualiza o status de férias do funcionário"""
+        funcionario = self.session.get(Funcionario, funcionario_id)
+        if funcionario:
+            funcionario.em_ferias = em_ferias
+            self.session.commit()
+            return True
+        return False
+
+    def verificar_status_funcionario(self, funcionario_id: int) -> dict:
+        """Verifica se o funcionário está de férias ou com atestado ativo"""
+        funcionario = self.session.get(Funcionario, funcionario_id)
+        if not funcionario:
+            return {"em_ferias": False, "em_atestado": False}
+
+        # Verificar atestados ativos
+        atestado_ativo = self.session.query(Atestado).filter(
+            Atestado.funcionario_id == funcionario_id,
+            Atestado.ativo == True,
+            Atestado.data_fim >= datetime.now().date()  # Verifica se o atestado ainda está vigente
+        ).first()
+
+        # Verificar férias ativas
+        ferias_ativa = self.session.query(Ferias).filter(
+            Ferias.funcionario_id == funcionario_id,
+            Ferias.ativa == True,
+            Ferias.data_fim >= datetime.now().date()  # Verifica se as férias ainda estão vigentes
+        ).first()
+
+        return {
+            "em_ferias": bool(ferias_ativa),
+            "em_atestado": bool(atestado_ativo)
+        }
