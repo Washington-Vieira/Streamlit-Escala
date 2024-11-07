@@ -71,3 +71,8 @@ class DatabaseManager:
             Funcionario.empresa_id == empresa_id,
             Funcionario.is_folguista == True
         ).all()
+
+    def listar_horarios_funcionarios_por_empresa(self, empresa_id):
+        """Retorna um dicionário com os horários dos funcionários de uma empresa específica."""
+        funcionarios = self.session.query(Funcionario).filter(Funcionario.empresa_id == empresa_id).all()
+        return {funcionario.id: funcionario.horario_turno for funcionario in funcionarios}
